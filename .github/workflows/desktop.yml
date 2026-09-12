@@ -24,7 +24,10 @@ jobs:
         shell: pwsh
         run: |
           $taskApp = Start-Process -FilePath .\dist\Hearthkeeper\Hearthkeeper.exe -ArgumentList '--smoke-test', 'var/native-packaged' -PassThru -Wait
-          if ($taskApp.ExitCode -ne 0) { throw "Packaged desktop smoke test failed: $($taskApp.ExitCode)" }
+          if ($taskApp.ExitCode -ne 0) {
+            if (Test-Path var/native-packaged/smoke-error.txt) { Get-Content var/native-packaged/smoke-error.txt }
+            throw "Packaged desktop smoke test failed: $($taskApp.ExitCode)"
+          }
           if (!(Test-Path var/native-packaged/result.json)) { throw 'The packaged app did not write its test result.' }
         env:
           QT_QPA_PLATFORM: offscreen

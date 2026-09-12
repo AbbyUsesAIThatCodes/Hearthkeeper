@@ -3,6 +3,7 @@ import json
 from pathlib import Path
 import sys
 import time
+import webbrowser
 from unittest.mock import patch
 
 from PySide6.QtCore import Qt
@@ -21,7 +22,7 @@ def run(application, directory):
         snapshot = capture(reader, 7, "copperleaf-demo", demo=True)
     archive = write_archive(directory / "brindle.hearth", snapshot)
     # Launching the desktop or reading its archive must never invoke Docker or a browser.
-    with patch("subprocess.Popen", side_effect=AssertionError("Unexpected process launch")), patch("webbrowser.open", side_effect=AssertionError("Unexpected browser")):
+    with patch("subprocess.Popen", side_effect=AssertionError("Unexpected process launch")), patch.object(webbrowser, "open", side_effect=AssertionError("Unexpected browser")):
         window = MainWindow(remember=False)
         window.show(); application.processEvents(); QTest.qWait(50)
         assert window.pages.count() == 5
@@ -63,4 +64,3 @@ def run(application, directory):
     window.close(); application.processEvents()
     (directory / "result.json").write_text(json.dumps({"passed": True, "native_widgets": True,
         "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes"]}))
-
