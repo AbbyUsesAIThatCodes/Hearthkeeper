@@ -40,8 +40,12 @@ successful backup. Keep normal realm backups until restoration is tested.
 - The native Qt smoke test checks startup without processes/browser calls, archive
   search, module/coverage views, literal text handling, and background work.
 - Windows CI repeats the native checks inside the packaged executable.
+- Windows CI also reproduces a Python 3.14 default with Python 3.12 installed
+  alongside it, then checks that the BAT source launcher selects the supported one.
 - The real-source build gate compiles the selected stack, imports upstream SQL,
   verifies an SRP exchange against authserver, and checks backup creation.
+- The runtime image checks shared libraries for the core and all extraction tools;
+  the world binary must initialize its databases before rejecting absent game maps.
 - Existing Windows/Linux archive, Chromium HTML-viewer, and fictional MySQL checks remain.
 
 Game data extraction, world startup, in-game behavior, and restore remain separate

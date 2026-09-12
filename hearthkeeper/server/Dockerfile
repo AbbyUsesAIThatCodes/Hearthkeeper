@@ -23,9 +23,15 @@ FROM ubuntu:24.04 AS runtime
 ENV DEBIAN_FRONTEND=noninteractive PYTHONUNBUFFERED=1 PYTHONPATH=/manager
 RUN apt-get update && apt-get install -y --no-install-recommends \
     ca-certificates libmysqlclient21 libreadline8 libicu74 libssl3t64 zlib1g libbz2-1.0 \
-    liblzma5 mysql-client python3 python3-pymysql python3-cryptography \
+    liblzma5 libncurses6 mysql-client python3 python3-pymysql python3-cryptography \
     && rm -rf /var/lib/apt/lists/*
 COPY --from=build /opt/ac /opt/ac
+RUN for program in /opt/ac/bin/authserver /opt/ac/bin/worldserver /opt/ac/bin/dbimport \
+    /opt/ac/bin/map_extractor /opt/ac/bin/vmap4_extractor /opt/ac/bin/vmap4_assembler \
+    /opt/ac/bin/mmaps_generator; do \
+      ldd "$program" > /tmp/hearthkeeper-libraries.txt && cat /tmp/hearthkeeper-libraries.txt \
+      && ! grep -q 'not found' /tmp/hearthkeeper-libraries.txt || exit 1; \
+    done && rm /tmp/hearthkeeper-libraries.txt
 COPY --from=build /sql /src
 RUN mv /opt/ac/etc /defaults && ln -s /realm/etc /opt/ac/etc
 COPY hearthkeeper /manager/hearthkeeper

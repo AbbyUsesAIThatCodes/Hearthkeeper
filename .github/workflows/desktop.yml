@@ -31,6 +31,23 @@ jobs:
           if (!(Test-Path var/native-packaged/result.json)) { throw 'The packaged app did not write its test result.' }
         env:
           QT_QPA_PLATFORM: offscreen
+      - name: Install an unsupported default Python to reproduce the launch report
+        uses: actions/setup-python@v5
+        with:
+          python-version: '3.14'
+      - name: Select supported Python when the Windows default is 3.14
+        shell: pwsh
+        env:
+          PY_PYTHON: '3.14'
+          PY_PYTHON3: '3.14'
+        run: |
+          $taskDefault = & py -3 -c "import sys; print(str(sys.version_info.major) + '.' + str(sys.version_info.minor))"
+          if ($LASTEXITCODE -ne 0 -or $taskDefault -ne '3.14') { throw 'Could not reproduce the unsupported default Python.' }
+          $taskSelected = & cmd /d /c "Start-Hearthkeeper.bat --check-python"
+          if ($LASTEXITCODE -ne 0) { throw 'The launcher failed with a compatible side-by-side Python installed.' }
+          $taskDetails = $taskSelected | ConvertFrom-Json
+          if ($taskDetails.version[0] -ne 3 -or $taskDetails.version[1] -ne 12) { throw 'The launcher did not select Python 3.12.' }
+          Write-Output "Default Python was 3.14; the source launcher correctly selected 3.12."
       - uses: actions/upload-artifact@v4
         with:
           name: Hearthkeeper-0.1.0a2-Windows

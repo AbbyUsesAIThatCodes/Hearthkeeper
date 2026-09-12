@@ -8,17 +8,30 @@ The main application uses native Qt windows. It does not run in a browser.
 
 ## Open the desktop app
 
-**Packaged Windows app:** download the `Hearthkeeper-0.1.0a2-Windows` artifact
-from the PR's successful **Native desktop** workflow. Extract the entire ZIP and
-open **Hearthkeeper.exe**. Keep the accompanying `_internal` folder beside it.
+**Packaged Windows app (no Python):** run **Download-Windows-Preview.bat**, or open
+[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fdesktop-realm-manager).
+Sign into GitHub **in your browser**; GitHub Desktop's sign-in is separate.
+Open a successful run for `feature/desktop-realm-manager`, scroll to **Artifacts**,
+and select **Hearthkeeper-0.1.0a2-Windows**. Extract the entire ZIP, then open
+**Hearthkeeper.exe**. Keep the accompanying `_internal` folder beside it.
 No Python installation is needed. Click **Desktop shortcut** once to create an icon.
 This development build is unsigned; a signed distribution is a later packaging step.
+Artifacts expire after 30 days. A direct artifact link can show a 404 when you are
+signed out, lack access, or the artifact has expired; use the build list above.
 
 **GitHub Desktop / source:** fetch and select `feature/desktop-realm-manager`,
 then run **Start-Hearthkeeper.bat**. This route needs Python **3.11–3.13**
-(3.12 recommended). The first launch downloads the Qt toolkit into the repository's
+(3.12 recommended). The launcher searches for an installed supported version even
+when Windows defaults to Python 3.14 or another unsupported version. If none is
+installed, use the packaged app or install a supported Python alongside your current
+one; no uninstall or default-version change is required.
+The first launch downloads the Qt toolkit into the repository's
 own `.venv`; later launches reuse it. Nothing is installed into your system Python.
 On Linux, run `sh start-hearthkeeper.sh` with Python's venv support installed.
+
+**Start-Archive-Demo.bat** deliberately opens the earlier browser interface. It is
+not the desktop launcher. To check source-launcher selection without installing
+anything or opening the app, run `Start-Hearthkeeper.bat --check-python` in a terminal.
 
 You can explore **Archives → Meet Brindle · demo** without Docker, game files,
 or an account. This is the same fictional archive, now displayed in native widgets.

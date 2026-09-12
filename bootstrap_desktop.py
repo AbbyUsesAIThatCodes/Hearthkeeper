@@ -5,7 +5,6 @@ import os
 from pathlib import Path
 import subprocess
 import sys
-import tomllib
 
 ROOT = Path(__file__).resolve().parent
 
@@ -13,6 +12,10 @@ ROOT = Path(__file__).resolve().parent
 def main():
     if not (3, 11) <= sys.version_info < (3, 14):
         raise RuntimeError("The source desktop launcher currently needs Python 3.11–3.13. Python 3.12 is recommended; the packaged app needs no Python installation.")
+    if sys.argv[1:] == ["--check-python"]:
+        print(json.dumps({"version": list(sys.version_info[:3]), "executable": sys.executable}))
+        return
+    import tomllib
     environment = ROOT / ".venv"
     python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if not python.is_file():

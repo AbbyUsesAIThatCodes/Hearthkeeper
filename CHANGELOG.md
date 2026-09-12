@@ -10,6 +10,10 @@
 - Added original 3.3.5a SRP account registration and a real authserver protocol test.
 - Added checks for realm operation locks, failures, data boundaries, and desktop packaging.
 - Retained command-line tools and optional standalone HTML archive export.
+- Fixed Windows source-launcher selection when the default Python is unsupported;
+  added a Python-free download shortcut and browser sign-in/artifact instructions.
+- Fixed the worldserver runtime's missing ncurses library and checked shared
+  libraries for the server binaries and extraction tools during image construction.
 
 Game data extraction, world startup, in-game play, WoWee installation, and
 restoration still need live acceptance testing. See PR checks for build evidence.
