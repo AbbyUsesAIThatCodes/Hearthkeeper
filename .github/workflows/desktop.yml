@@ -42,3 +42,4 @@ jobs:
             var/native-source/result.json
             var/native-packaged/*.png
             var/native-packaged/result.json
+            var/native-packaged/smoke-error.txt

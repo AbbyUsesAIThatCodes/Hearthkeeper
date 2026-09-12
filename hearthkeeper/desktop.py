@@ -254,7 +254,11 @@ class MainWindow(QMainWindow):
         sidebar = QFrame(); sidebar.setObjectName("sidebar"); sidebar.setFixedWidth(212)
         navigation = QVBoxLayout(sidebar); navigation.setContentsMargins(18, 28, 18, 22); navigation.setSpacing(9)
         emblem = QLabel(); emblem.setPixmap(QIcon(str(ASSETS / "hearthkeeper.svg")).pixmap(64, 64))
-        navigation.addWidget(emblem); navigation.addWidget(label("Hearthkeeper", "brand"))
+        navigation.addWidget(emblem)
+        brand = label("Hearthkeeper", "brand")
+        navigation.addWidget(brand)
+        brand.ensurePolished()
+        sidebar.setFixedWidth(max(212, brand.fontMetrics().horizontalAdvance(brand.text()) + 44))
         navigation.addWidget(label("YOUR OWN AZEROTH", "brandSub")); navigation.addSpacing(28)
         self.nav_buttons = []
         for index, title in enumerate(("Realm", "Characters", "Archives", "Backups", "Workshop")):
