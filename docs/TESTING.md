@@ -43,5 +43,7 @@ Report whether the BAT opens the viewer, whether the layout feels readable, and
 whether equipment/search/module/coverage views behave as described. Copy an error
 message rather than attaching private files. If all looks good, merge the PR.
 
-Live-server build, login, MySQL integration, healing with bots, and restoration
-belong to the next acceptance gate; passing the demo does not establish them.
+CI additionally checks a disposable MySQL service with fictional fixture tables
+and exercises the viewer in Chromium. Live-server build, login, capture against
+full upstream schemas, healing with bots, and restoration belong to the next
+acceptance gate; passing these fixture checks does not establish them.

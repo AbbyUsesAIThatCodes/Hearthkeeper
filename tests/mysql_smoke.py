@@ -1,4 +1,5 @@
 """CI-only MySQL integration using disposable databases and fictional fixture rows."""
+from contextlib import closing
 import os
 from pathlib import Path
 import sqlite3
@@ -23,7 +24,7 @@ def main():
     with tempfile.TemporaryDirectory() as temporary:
         directory = Path(temporary)
         sqlite_path = create_fixture(directory / "source.sqlite")
-        with sqlite3.connect(sqlite_path) as sqlite_connection:
+        with closing(sqlite3.connect(sqlite_path)) as sqlite_connection:
             sqlite_connection.row_factory = sqlite3.Row
             with pymysql.connect(host="127.0.0.1", user="root", password=root_password, autocommit=True) as admin:
                 with admin.cursor() as cursor:
@@ -42,7 +43,7 @@ def main():
                         if rows:
                             placeholders = ",".join(["%s"] * len(columns))
                             cursor.executemany(f"INSERT INTO {qualified} VALUES ({placeholders})", [tuple(row) for row in rows])
-                    cursor.execute("CREATE USER 'hearthkeeper_reader'@'%' IDENTIFIED BY %s", (read_password,))
+                    cursor.execute("CREATE USER 'hearthkeeper_reader'@%s IDENTIFIED BY %s", ("%", read_password))
                     for database in databases.values():
                         cursor.execute(f"GRANT SELECT ON {identifier(database)}.* TO 'hearthkeeper_reader'@'%'")
         with mysql_reader(host="127.0.0.1", port=3306, user="hearthkeeper_reader", password=read_password,

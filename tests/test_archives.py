@@ -1,5 +1,6 @@
 import base64
 import copy
+from contextlib import closing
 import hashlib
 import io
 import json
@@ -57,13 +58,13 @@ class ArchiveTests(unittest.TestCase):
         with sqlite_reader(self.database) as reader:
             with self.assertRaises(ArchiveError):
                 capture(reader, 9, "test-realm")
-        with sqlite3.connect(self.database) as connection:
+        with closing(sqlite3.connect(self.database)) as connection, connection:
             connection.execute("UPDATE characters SET online = 1 WHERE guid = 7")
         with self.assertRaisesRegex(ArchiveError, "Log this character out"):
             self.snapshot()
 
     def test_module_data_unknown_columns_and_binary_values_survive_roundtrip(self):
-        with sqlite3.connect(self.database) as connection:
+        with closing(sqlite3.connect(self.database)) as connection, connection:
             connection.execute("UPDATE character_settings SET data = ? WHERE guid = 7 AND source = ?",
                                (b"\x00\xff\x80module-state", "hearthkeeper.demo.progression"))
         snapshot = self.snapshot()
@@ -75,7 +76,7 @@ class ArchiveTests(unittest.TestCase):
         self.assertIn("custom_story_note", restored["tables"]["characters.characters"]["rows"][0])
 
     def test_missing_references_and_unsupported_tables_are_visible(self):
-        with sqlite3.connect(self.database) as connection:
+        with closing(sqlite3.connect(self.database)) as connection, connection:
             connection.execute("DELETE FROM item_instance WHERE guid = 101")
             connection.execute("DELETE FROM item_template WHERE entry = 900003")
         snapshot = self.snapshot()
@@ -86,7 +87,7 @@ class ArchiveTests(unittest.TestCase):
         self.assertTrue(any(item["guid"] == 101 for item in normalized(snapshot)["items"]))
 
     def test_incompatible_schema_fails_instead_of_silently_dropping_records(self):
-        with sqlite3.connect(self.database) as connection:
+        with closing(sqlite3.connect(self.database)) as connection, connection:
             connection.execute("ALTER TABLE character_settings RENAME COLUMN guid TO owner")
         with self.assertRaisesRegex(ArchiveError, "Unsupported schema"):
             self.snapshot()

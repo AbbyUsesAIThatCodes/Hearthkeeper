@@ -77,9 +77,12 @@ ownerless mail attachments, raw module payload retention, read-only SQLite acces
 damaged archives, HTML escaping, non-overwrite behavior, and the offline demo.
 CI runs these checks on Windows and Linux with Python 3.11 and 3.13.
 
-The MySQL adapter and actual realm/client still need live integration testing.
-SQLite is a deliberately small test fixture, not the server's production database
-format. See the PR for the checks that actually ran in its environment.
+CI also exercises the MySQL adapter against a disposable MySQL 8.4 service with
+fictional fixture tables and a SELECT-only account, and checks the offline viewer
+in Chromium. The actual realm/client and full upstream database schemas still
+need live integration testing. SQLite is a deliberately small test fixture, not
+the server's production database format. See the PR for the checks that actually
+ran in its environment.
 
 ## Development agreement
 
