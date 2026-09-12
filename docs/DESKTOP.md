@@ -24,8 +24,8 @@ The database uses a dedicated named volume. Unique service passwords are stored
 with private local realm metadata; there are no shared default realm credentials.
 The server has database privileges for its own schemas, while character capture
 uses a separate SELECT-only identity. MySQL is reachable only within the Compose
-network. Container-to-container SQL is not encrypted; this initial design assumes
-a trusted local Docker environment.
+network. SQL connections are not configured for verified TLS; this initial design
+assumes a trusted local Docker environment.
 
 The desktop does not need to run as administrator. Installing Docker or enabling
 its Windows prerequisites is a separate system operation. Docker access itself is

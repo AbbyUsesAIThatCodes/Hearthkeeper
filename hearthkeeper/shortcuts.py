@@ -6,10 +6,10 @@ import sys
 from PySide6.QtCore import QStandardPaths
 
 
-def create_shortcut():
+def create_shortcut(*, desktop_path=None, data_path=None):
     if os.name != "nt":
         raise RuntimeError("Automatic shortcuts currently support Windows. You can pin the application using your desktop environment.")
-    desktop = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation))
+    desktop = Path(desktop_path or QStandardPaths.writableLocation(QStandardPaths.StandardLocation.DesktopLocation))
     target = desktop / "Hearthkeeper.lnk"
     if target.exists():
         raise FileExistsError("A Hearthkeeper desktop shortcut already exists; it has been kept.")
@@ -20,7 +20,7 @@ def create_shortcut():
         raise RuntimeError("Run the Windows launcher once to prepare the desktop environment.")
     import win32com.client
     from PySide6.QtGui import QIcon
-    icon = Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation)) / "hearthkeeper.ico"
+    icon = Path(data_path or QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation)) / "hearthkeeper.ico"
     icon.parent.mkdir(parents=True, exist_ok=True)
     if not icon.exists() and not QIcon(str(package / "assets" / "hearthkeeper.svg")).pixmap(256, 256).save(str(icon), "ICO"):
         raise RuntimeError("Could not prepare the shortcut icon.")

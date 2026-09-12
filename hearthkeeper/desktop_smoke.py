@@ -1,5 +1,6 @@
 """Offline native-widget acceptance checks, also run inside the packaged executable."""
 import json
+import os
 from pathlib import Path
 import sys
 import time
@@ -21,6 +22,12 @@ def run(application, directory):
     with sqlite_reader(database) as reader:
         snapshot = capture(reader, 7, "copperleaf-demo", demo=True)
     archive = write_archive(directory / "brindle.hearth", snapshot)
+    from .server.manager import PACKAGE
+    if getattr(sys, "frozen", False):
+        for relative in ("__init__.py", "archive.py", "database.py", "realm.py", "data/realm.lock.json",
+                         "server/Dockerfile", "server/fetch_sources.py", "server/manager.py",
+                         "server/container_entry.py", "server/accounts.py", "server/__init__.py"):
+            assert (PACKAGE / relative).is_file(), "Missing installer resource: " + relative
     # Launching the desktop or reading its archive must never invoke Docker or a browser.
     with patch("subprocess.Popen", side_effect=AssertionError("Unexpected process launch")), patch.object(webbrowser, "open", side_effect=AssertionError("Unexpected browser")):
         window = MainWindow(remember=False)
@@ -61,6 +68,21 @@ def run(application, directory):
         application.processEvents(); QTest.qWait(5)
     assert complete == ["finished"] and window.worker is None
     assert not any("QtWebEngine" in name for name in sys.modules)
+    if os.name == "nt":
+        from .shortcuts import create_shortcut
+        import win32com.client
+        desktop = directory / "test-desktop"; desktop.mkdir()
+        shortcut = create_shortcut(desktop_path=desktop, data_path=directory / "test-appdata")
+        assert shortcut.is_file()
+        link = win32com.client.Dispatch("WScript.Shell").CreateShortcut(str(shortcut))
+        assert Path(link.TargetPath).is_file()
+        assert Path(link.IconLocation.split(",")[0]).is_file()
+        try:
+            create_shortcut(desktop_path=desktop, data_path=directory / "test-appdata")
+        except FileExistsError:
+            pass
+        else:
+            raise AssertionError("An existing shortcut was replaced")
     window.close(); application.processEvents()
     (directory / "result.json").write_text(json.dumps({"passed": True, "native_widgets": True,
         "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes"]}))

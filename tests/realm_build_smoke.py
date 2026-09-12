@@ -9,7 +9,7 @@ import struct
 import sys
 
 sys.path.insert(0, str(Path(__file__).resolve().parents[1]))
-from hearthkeeper.server.manager import ManagedRealm, Runner, create_realm, local_docker
+from hearthkeeper.server.manager import ManagedRealm, RealmError, Runner, create_realm, local_docker
 
 ROOT = Path("var/ci-realm")
 
@@ -88,6 +88,20 @@ def probe():
         realm.create_account("CITEST", "CI-proof-only")
         realm.compose("up", "-d", "--no-build", "--wait", "--wait-timeout", "180", "auth")
         authenticate("CITEST", "CI-proof-only")
+        observed = []
+        original_log = realm.runner.log
+        realm.runner.log = lambda line: (observed.append(line), original_log(line))
+        try:
+            # No data is copied into /realm/server-data. The real world binary
+            # must initialize the Playerbots database and then reject missing maps.
+            realm.compose("run", "--rm", "--no-deps", "-T", "world")
+        except RealmError:
+            assert any("Failed to find map files for starting areas" in line for line in observed), "World failed before reaching the expected missing-map boundary"
+        else:
+            raise AssertionError("World unexpectedly accepted missing game data")
+        finally:
+            realm.runner.log = original_log
+        print("World initialized its databases and correctly rejected missing game maps.")
         rows = realm.control("characters")
         assert "[]" in rows, "Expected an empty real character schema"
         result = realm.backup()

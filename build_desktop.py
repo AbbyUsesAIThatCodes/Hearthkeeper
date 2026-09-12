@@ -14,14 +14,23 @@ Path("build").mkdir(exist_ok=True)
 icon = Path("build/hearthkeeper.ico")
 if not QIcon("hearthkeeper/assets/hearthkeeper.svg").pixmap(256, 256).save(str(icon), "ICO"):
     raise SystemExit("Could not create the application icon")
-PyInstaller.__main__.run([
+arguments = [
     "launch_desktop.py", "--noconfirm", "--clean", "--windowed", "--onedir", "--name", "Hearthkeeper",
     "--icon", str(icon), "--collect-data", "hearthkeeper", "--hidden-import", "win32com.client",
     "--exclude-module", "PySide6.QtWebEngineCore", "--exclude-module", "PySide6.QtWebEngineWidgets",
     "--exclude-module", "PySide6.QtWebEngineQuick", "--exclude-module", "PySide6.QtQml",
     "--copy-metadata", "PySide6", "--copy-metadata", "PySide6-Essentials",
     "--copy-metadata", "shiboken6", "--copy-metadata", "pywin32",
-])
+]
+# The Docker build needs these Python sources as files, in addition to the
+# modules embedded in PyInstaller's executable archive.
+runtime_sources = ["__init__.py", "archive.py", "database.py", "realm.py",
+                   "server/__init__.py", "server/manager.py", "server/accounts.py",
+                   "server/container_entry.py", "server/fetch_sources.py"]
+for relative in runtime_sources:
+    source = Path("hearthkeeper") / relative
+    arguments += ["--add-data", str(source) + os.pathsep + str(source.parent)]
+PyInstaller.__main__.run(arguments)
 destination = Path("dist/Hearthkeeper")
 shutil.copyfile("THIRD_PARTY_NOTICES.md", destination / "THIRD_PARTY_NOTICES.md")
 shutil.copytree("licenses", destination / "licenses", dirs_exist_ok=True)
