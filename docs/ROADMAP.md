@@ -4,7 +4,7 @@ The aim is a personal Azeroth that stays enjoyable and can be preserved. Release
 pair semantic versions with codenames. We work through PRs, local user testing,
 feedback, and user merges.
 
-## 0.1.0a1 — First Campfire preview (this PR)
+## 0.1.0a1 — First Campfire archive preview
 
 - Fictional, offline character archive and viewer.
 - AzerothCore adapter that explicitly includes `character_settings`.
@@ -13,6 +13,18 @@ feedback, and user merges.
 - Candidate core/module/client source pins and local source-preparation command.
 
 This is a development preview; restoration and a playable realm are not complete.
+
+## 0.1.0a2 — First Campfire desktop preview
+
+- Native Qt desktop application, Windows executable packaging, and a desktop icon.
+- Managed installation from the selected source pins and user-supplied game files.
+- Dedicated database initialization, progression/bot configuration, and data extraction.
+- Start, stop, status, logs, ordinary/GM account creation, and rate/population settings.
+- Native archives, managed character capture, and SQL/configuration backups.
+- Automated build/SQL/authentication gate, plus native packaged-app checks.
+
+The build gate has no game assets. Completing extraction, world startup, in-game
+play, WoWee setup, and restoration still requires subsequent acceptance work.
 
 ## 0.1.0 — First Campfire (release gate)
 

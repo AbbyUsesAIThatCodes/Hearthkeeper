@@ -7,6 +7,7 @@ import json
 from pathlib import Path
 
 from .archive import read_archive, write_new
+from . import __version__
 from .model import normalized, records
 
 
@@ -75,7 +76,7 @@ def render_archive(archive_path, output_path):
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1">
 <meta http-equiv="Content-Security-Policy" content="default-src 'none'; script-src 'sha256-{script_hash}'; style-src 'unsafe-inline'; base-uri 'none'; form-action 'none'">
 <title>{name} · Hearthkeeper</title><style>{css}</style></head><body>
-<header class="masthead"><div class="brand"><span class="hearth-mark" aria-hidden="true">✦</span><span>Hearthkeeper<small>YOUR ADVENTURES, KEPT CLOSE</small></span></div><span class="version">FIRST CAMPFIRE <b>0.1.0a1</b></span></header>
+<header class="masthead"><div class="brand"><span class="hearth-mark" aria-hidden="true">✦</span><span>Hearthkeeper<small>YOUR ADVENTURES, KEPT CLOSE</small></span></div><span class="version">FIRST CAMPFIRE <b>{__version__}</b></span></header>
 <main>{demo_label}<div class="eyebrow">THE ARCHIVE DESK <span> / </span> CHARACTER RECORD</div>
 <section class="hero"><div class="portrait" aria-hidden="true">{text(str(character.get('name', '?'))[:1])}</div><div class="hero-text"><span class="eyebrow">AN EXPLORER'S RECORD</span><h1>{name}</h1><p>Level {text(character.get('level'))} · {text(character['race_label'])} {text(character['class_label'])}</p><span class="realm">{text(source['realm'])}</span></div><div class="seal"><span class="seal-icon">✓</span><strong>Checksum verified</strong><span>Partial character archive</span></div></section>
 <section class="stats" aria-label="Archive counts">{stat_cards}</section>

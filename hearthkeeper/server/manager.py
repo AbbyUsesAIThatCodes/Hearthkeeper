@@ -1,5 +1,7 @@
 """Local Docker realm orchestration, independent of the desktop toolkit."""
 from datetime import datetime, timezone
+from contextlib import contextmanager
+from functools import wraps
 import json
 import os
 from pathlib import Path
@@ -17,6 +19,42 @@ PACKAGE = Path(__file__).resolve().parents[1]
 
 class RealmError(Exception):
     pass
+
+
+@contextmanager
+def operation_lock(path):
+    """An OS-held lock releases on process exit; a leftover file is harmless."""
+    with (Path(path) / "operation.lock").open("a+b") as stream:
+        if stream.tell() == 0:
+            stream.write(b"0"); stream.flush()
+        stream.seek(0)
+        try:
+            if os.name == "nt":
+                import msvcrt
+                msvcrt.locking(stream.fileno(), msvcrt.LK_NBLCK, 1)
+            else:
+                import fcntl
+                fcntl.flock(stream.fileno(), fcntl.LOCK_EX | fcntl.LOCK_NB)
+        except OSError as error:
+            raise RealmError("Another Hearthkeeper operation is using this realm. Let it finish first.") from error
+        try:
+            yield
+        finally:
+            stream.seek(0)
+            if os.name == "nt":
+                msvcrt.locking(stream.fileno(), msvcrt.LK_UNLCK, 1)
+            else:
+                fcntl.flock(stream.fileno(), fcntl.LOCK_UN)
+
+
+def exclusive(function):
+    @wraps(function)
+    def wrapped(self, *args, **kwargs):
+        with operation_lock(self.path):
+            self.config = json.loads((self.path / "realm.json").read_text(encoding="utf-8"))
+            validate_config(self.config)
+            return function(self, *args, **kwargs)
+    return wrapped
 
 
 def atomic_json(path, value):
@@ -41,6 +79,13 @@ def validate_server_data(path):
         with dbc.open("rb") as stream:
             if stream.read(4) != b"WDBC":
                 raise RealmError("The data does not have an original client DBC header: " + name)
+            import struct
+            header = stream.read(16)
+            if len(header) != 16:
+                raise RealmError("Truncated DBC file: " + name)
+            count, fields, record_size, strings = struct.unpack("<4I", header)
+            if not count or not fields or record_size != fields * 4 or dbc.stat().st_size < 20 + count * record_size + strings:
+                raise RealmError("Incomplete DBC records: " + name)
     if not any((path / "maps").glob("*.map")) or not any((path / "vmaps").glob("*.vmtree")):
         raise RealmError("Terrain or collision data is incomplete.")
     if not any((path / "mmaps").glob("*.mmtile")):
@@ -258,6 +303,7 @@ class ManagedRealm:
             return json.loads(output)
         return [json.loads(line) for line in output.splitlines() if line.startswith("{")]
 
+    @exclusive
     def install(self):
         if self.config["phase"] == "installed":
             raise RealmError("This realm is already installed. Use Start realm.")
@@ -281,6 +327,7 @@ class ManagedRealm:
         self.save()
         self.runner.log("Installation steps completed. Create a game account, then Start realm.")
 
+    @exclusive
     def start(self):
         if self.config["phase"] != "installed":
             raise RealmError("Finish Install / Resume first.")
@@ -289,31 +336,58 @@ class ManagedRealm:
         self.compose("up", "-d", "--no-build", "--wait", "--wait-timeout", "900", "auth", "world")
         return "Auth and world ports are responding. In-game login remains a separate check."
 
+    @exclusive
     def stop(self):
         self.check()
         self.compose("stop", "--timeout", "120", "world", "auth", "database")
         return "Realm services stopped. Database volume and files are retained."
 
+    @exclusive
     def backup(self):
         self.check()
         self.compose("stop", "--timeout", "120", "world", "auth")
         states = self.status()
         if any(row.get("Service") in ("world", "auth") and row.get("State") not in ("exited", "created") for row in states):
             raise RealmError("Auth and world must be stopped before backup.")
+        if any(row.get("Service") in ("world", "auth") and row.get("ExitCode") in (137, 139) for row in states):
+            raise RealmError("A game service was killed or crashed. Check its logs before treating shutdown as a saved character checkpoint.")
         self.compose("up", "-d", "--wait", "--wait-timeout", "300", "database")
         return self.control("backup") + "\nAuth and world remain stopped. Use Start realm when ready."
 
+    @exclusive
     def create_account(self, username, password, administrator=False):
         from .accounts import registration
         registration(username, password)
         self.check()
         self.runner.redactions += [password, password.upper()]
+        self.compose("up", "-d", "--wait", "--wait-timeout", "300", "database")
         return self.control("account", {"username": username, "password": password, "administrator": administrator})
 
+    @exclusive
     def capture(self, guid):
         self.check()
+        self.compose("up", "-d", "--wait", "--wait-timeout", "300", "database")
         output = self.control("capture", {"guid": int(guid)})
         name = next((line.removeprefix("ARCHIVE:") for line in output.splitlines() if line.startswith("ARCHIVE:")), None)
         if not name or Path(name).name != name:
             raise RealmError("Capture did not return an archive filename.")
         return self.path / "archives" / name
+
+    @exclusive
+    def list_characters(self):
+        self.check()
+        self.compose("up", "-d", "--wait", "--wait-timeout", "300", "database")
+        output = self.control("characters")
+        return json.loads(next(line for line in output.splitlines() if line.startswith("[")))
+
+    @exclusive
+    def update_settings(self, xp_rate, random_bots):
+        self.check()
+        if any(row.get("Service") in ("auth", "world") and row.get("State") == "running" for row in self.status()):
+            raise RealmError("Stop the realm before changing settings.")
+        changed = {**self.config, "xp_rate": xp_rate, "random_bots": random_bots}
+        validate_config(changed)
+        self.config = changed
+        self.save()
+        self.control("configure")
+        return "Settings saved. They apply on the next Start realm."

@@ -1,49 +1,48 @@
-# Test this PR in GitHub Desktop
+# Test the desktop PR
 
-1. Fetch origin and select `feature/first-campfire-preview`.
-2. Open the repository in Explorer and run `Start-Hearthkeeper.bat`.
-3. If Python is missing or too old, install Python 3.11+ and rerun. No WoW client,
-   Docker, MySQL, or game assets are needed for this preview.
+This branch is `feature/desktop-realm-manager` and the version is **0.1.0a2**.
+It builds on the still-separate archive preview PR. The PR description records
+the exact commit and CI outcomes; do not infer gameplay readiness from packaging checks.
 
-## What should happen
+## Without Docker or game files
 
-- A browser document displays **Brindle**, a fictional level 24 dwarf priest,
-  with a clear fictional-demo notice and partial-coverage label.
-- Equipment & bags shows six item records, including an ownerless addressed mail
-  attachment, a bank stack, and the Copperleaf Lantern.
-- Searching `Lantern` filters table rows; clearing the search restores them.
-- Module data expands to show the fictional progression/journal payloads exactly.
-- Coverage identifies missing tables and an unsupported custom-town table.
-- The document continues working offline. Each demo run has its own output folder.
-- Running the BAT again does not overwrite the first archive or HTML file.
+1. Run the packaged **Hearthkeeper.exe**, or use **Start-Hearthkeeper.bat** in
+   GitHub Desktop with Python 3.11–3.13.
+2. Confirm it opens a desktop window and leaves server services untouched.
+3. Open **Archives → Meet Brindle · demo**.
+4. Inspect Overview, select **Equipment & bags**, search for `Lantern`, then clear it.
+   Six item rows should return, including the addressed mail attachment.
+5. Inspect **Module data** and **Coverage**. The custom-town table is intentionally
+   unsupported; fictional module settings are retained without decoding them as real IP data.
+6. Resize the window and move between the sidebar pages.
+7. Use **Desktop shortcut** and launch through the resulting icon.
 
-The sample fixtures are deliberately incomplete. Missing tables are expected.
-Demo progression payloads are marked fictional and are not the serialized format
-of Individual Progression.
+The fixture is fictional and incomplete. It contains no game assets. The native
+viewer works offline. The original HTML demo remains available through
+**Start-Archive-Demo.bat**.
 
-## Optional command-line checks
+## With Docker and matching files
 
-In a terminal opened in the repository, replace the example archive path with
-the one printed by your demo:
+Follow [realm setup](REALM_SETUP.md). Record the first failed stage and its final
+Activity lines if setup stops. Do not post credentials, real archives, SQL dumps,
+or private mail in the public repository.
 
-```sh
-python -m hearthkeeper verify var/demo/YOUR-RUN/brindle.hearth
-python -m hearthkeeper inspect var/demo/YOUR-RUN/brindle.hearth
-python -m hearthkeeper realm-plan
-python -m unittest discover -s tests -v
-```
+Check New realm → installation → account creation → Start → client connection.
+Test Stop and Start again. Check settings changes only while stopped, the backup
+folder, and character capture after logout. An `.incomplete` backup is not a
+successful backup. Keep normal realm backups until restoration is tested.
 
-`verify` should report valid checksums and structure while still describing the
-archive as partial and unsigned. `realm-plan` displays exact candidate commits
-and does not download, build, or launch anything.
+## Automated evidence
 
-## Useful feedback
+- 26 unit tests cover archive preservation, ownership boundaries, damaged files,
+  local-only Compose bindings, read-only game mounts, incomplete data, failed-import
+  state, concurrent-operation locks, remote Docker rejection, and password redaction.
+- The native Qt smoke test checks startup without processes/browser calls, archive
+  search, module/coverage views, literal text handling, and background work.
+- Windows CI repeats the native checks inside the packaged executable.
+- The real-source build gate compiles the selected stack, imports upstream SQL,
+  verifies an SRP exchange against authserver, and checks backup creation.
+- Existing Windows/Linux archive, Chromium HTML-viewer, and fictional MySQL checks remain.
 
-Report whether the BAT opens the viewer, whether the layout feels readable, and
-whether equipment/search/module/coverage views behave as described. Copy an error
-message rather than attaching private files. If all looks good, merge the PR.
-
-CI additionally checks a disposable MySQL service with fictional fixture tables
-and exercises the viewer in Chromium. Live-server build, login, capture against
-full upstream schemas, healing with bots, and restoration belong to the next
-acceptance gate; passing these fixture checks does not establish them.
+Game data extraction, world startup, in-game behavior, and restore remain separate
+acceptance gates. CI's placeholder data is never passed to a worldserver.

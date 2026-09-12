@@ -36,3 +36,17 @@ branches. No matching-stack build or gameplay certification is implied.
 
 Hearthkeeper's architecture, fictional content, preservation policies, and roadmap
 are proposals for this project, not capabilities attributed to the upstream projects.
+
+Desktop/installer source checks:
+
+- [Pinned core Dockerfile](https://github.com/mod-playerbots/azerothcore-wotlk/blob/06234df3d5ab26c93f4f1f06f3edb828b73ecd3c/apps/docker/Dockerfile):
+  Ubuntu 24.04 dependencies and build/install targets. Hearthkeeper has its own
+  Compose definition and does not run upstream's client-data download service.
+- [Database importer](https://github.com/mod-playerbots/azerothcore-wotlk/blob/06234df3d5ab26c93f4f1f06f3edb828b73ecd3c/src/tools/dbimport/Main.cpp):
+  core and selected module SQL initialization.
+- [SRP6 registration](https://github.com/mod-playerbots/azerothcore-wotlk/blob/06234df3d5ab26c93f4f1f06f3edb828b73ecd3c/src/common/Cryptography/Authentication/SRP6.cpp)
+  and [auth protocol](https://github.com/mod-playerbots/azerothcore-wotlk/blob/06234df3d5ab26c93f4f1f06f3edb828b73ecd3c/src/server/apps/authserver/Server/AuthSession.cpp):
+  account salt/verifier and wire-level authentication test.
+- [Qt for Python](https://doc.qt.io/qtforpython-6/) and
+  [Docker Desktop on Windows](https://docs.docker.com/desktop/setup/install/windows-install/):
+  native UI toolkit and user-installed local container prerequisites.

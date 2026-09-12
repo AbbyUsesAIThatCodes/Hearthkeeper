@@ -1,0 +1,44 @@
+name: Native desktop
+on:
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-desktop:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - run: python -m pip install ".[desktop]" pyinstaller==6.16.0
+      - name: Exercise native widgets from source
+        run: python -m hearthkeeper.desktop --smoke-test var/native-source
+        env:
+          QT_QPA_PLATFORM: offscreen
+      - name: Build the desktop executable
+        run: python build_desktop.py
+      - name: Exercise the packaged executable
+        shell: pwsh
+        run: |
+          $taskApp = Start-Process -FilePath .\dist\Hearthkeeper\Hearthkeeper.exe -ArgumentList '--smoke-test', 'var/native-packaged' -PassThru -Wait
+          if ($taskApp.ExitCode -ne 0) { throw "Packaged desktop smoke test failed: $($taskApp.ExitCode)" }
+          if (!(Test-Path var/native-packaged/result.json)) { throw 'The packaged app did not write its test result.' }
+        env:
+          QT_QPA_PLATFORM: offscreen
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hearthkeeper-0.1.0a2-Windows
+          path: dist/Hearthkeeper/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: native-desktop-screenshots
+          path: |
+            var/native-source/*.png
+            var/native-source/result.json
+            var/native-packaged/*.png
+            var/native-packaged/result.json

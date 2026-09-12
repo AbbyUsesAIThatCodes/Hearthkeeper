@@ -1,4 +1,4 @@
 #!/usr/bin/env sh
 set -eu
 cd "$(dirname "$0")"
-exec python3 -m hearthkeeper demo --open
+exec python3 bootstrap_desktop.py

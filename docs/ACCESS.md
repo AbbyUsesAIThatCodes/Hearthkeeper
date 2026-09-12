@@ -27,7 +27,18 @@ Any future access should be limited to the development environment and the task.
 Do not paste account passwords, browser cookies, or recovery codes into chat or
 issues. Installation and administrator changes should be specific and reviewable.
 
-## What this preview does
+## What the desktop and preview do
+
+- Opening the desktop reads only its application preferences and a previously
+  selected realm's metadata. It does not start Docker services automatically.
+- **New realm / Install** executes the reviewed server build and initializes a
+  dedicated realm after the user supplies its destination and game-data path.
+  The supplied game folder is mounted read-only. Only local Docker contexts are
+  accepted, with loopback game ports and no published database port.
+- The native viewer uses Qt widgets and renders archive values as literal text.
+- Whole-realm backups include credentials and authentication records. They have
+  different sensitivity from a partial character archive and are not encrypted.
+- The desktop shortcut action writes only Hearthkeeper's own shortcut and icon.
 
 - `demo` writes its own fictional SQLite file, `.hearth` archive, and HTML under
   `var/demo/` by default; it opens the HTML only when `--open` is requested.
@@ -37,7 +48,7 @@ issues. Installation and administrator changes should be specific and reviewable
   repositories into a new destination. It does not build or launch their code.
 - `capture-mysql` queries selected character/world records using one read-only
   transaction and a password prompt. It never connects to the auth database.
-- The offline HTML contains no remote fonts, scripts, images, analytics, or forms.
+- The optional offline HTML contains no remote fonts, scripts, images, analytics, or forms.
   Its content is escaped and its script is restricted with a CSP hash.
 
 Real archives and their HTML views are private data, **not encrypted files**.

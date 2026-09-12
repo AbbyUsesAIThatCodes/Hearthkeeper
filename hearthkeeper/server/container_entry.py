@@ -116,6 +116,8 @@ def run_tool(arguments, cwd=None):
 def extract():
     output = ROOT / "server-data"
     output.mkdir(exist_ok=True)
+    for name in ("dbc", "maps", "vmaps", "mmaps", "Cameras"):
+        (output / name).mkdir(exist_ok=True)
     config = settings()
     if config["data_kind"] == "prepared":
         for name in ("dbc", "maps", "vmaps", "mmaps", "Cameras"):
@@ -138,6 +140,13 @@ def extract():
             if marker.exists():
                 print("Keeping completed extraction step: " + name, flush=True)
                 continue
+            # These tools expect clean output when retrying a failed stage. Retain
+            # unfinished products separately instead of mistaking them for complete data.
+            target = {"models": "Buildings", "vmaps": "vmaps", "mmaps": "mmaps"}.get(name)
+            if target and (output / target).exists() and any((output / target).iterdir()):
+                (output / target).rename(output / (target + "-incomplete-" + timestamp()))
+            if target:
+                (output / target).mkdir(exist_ok=True)
             run_tool(command, cwd=output)
             marker.write_text("completed\n")
     from .manager import validate_server_data
@@ -208,8 +217,11 @@ def backup():
                 raise RuntimeError("Database backup failed. The incomplete folder is retained; it is not a usable backup.")
     shutil.copytree(ROOT / "etc", destination / "configuration")
     shutil.copyfile(ROOT / "realm.json", destination / "realm.json")
-    hashes = {str(path.relative_to(destination)): hashlib.file_digest(path.open("rb"), "sha256").hexdigest()
-              for path in destination.rglob("*") if path.is_file()}
+    hashes = {}
+    for path in destination.rglob("*"):
+        if path.is_file():
+            with path.open("rb") as stream:
+                hashes[str(path.relative_to(destination))] = hashlib.file_digest(stream, "sha256").hexdigest()
     (destination / "manifest.json").write_text(json.dumps({"format": "hearthkeeper-realm-backup/1",
         "sha256": hashes, "includes": ["four SQL databases", "configuration", "source pins", "local credentials"],
         "excludes": ["client and extracted game assets", "Docker image"],
