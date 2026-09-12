@@ -34,7 +34,7 @@ successful backup. Keep normal realm backups until restoration is tested.
 
 ## Automated evidence
 
-- 26 unit tests cover archive preservation, ownership boundaries, damaged files,
+- 27 unit tests cover archive preservation, ownership boundaries, damaged files,
   local-only Compose bindings, read-only game mounts, incomplete data, failed-import
   state, concurrent-operation locks, remote Docker rejection, and password redaction.
 - The native Qt smoke test checks startup without processes/browser calls, archive

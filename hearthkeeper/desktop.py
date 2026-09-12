@@ -435,7 +435,7 @@ class MainWindow(QMainWindow):
 
     def prerequisites(self):
         self.run_job("Checking local Docker prerequisites", local_docker,
-            lambda result: QMessageBox.information(self, "Docker is ready", f"Local Linux context: {result['context']}\nMemory available to Docker: {result['memory_gib']} GiB\nGame files and disk space are checked separately."))
+            lambda result: QMessageBox.information(self, "Docker is ready", f"Local Linux context: {result['context']}\nMemory available to Docker: {result['memory_gib']} GiB\nSupply matching game files and check available disk space before installing."))
 
     def new_realm(self):
         dialog = RealmDialog(self)

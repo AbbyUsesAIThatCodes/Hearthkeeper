@@ -84,7 +84,9 @@ def validate_server_data(path):
             if len(header) != 16:
                 raise RealmError("Truncated DBC file: " + name)
             count, fields, record_size, strings = struct.unpack("<4I", header)
-            if not count or not fields or record_size != fields * 4 or dbc.stat().st_size < 20 + count * record_size + strings:
+            # DBC fields can be packed bytes: CharStartOutfit, for example,
+            # contains byte-sized race/class/gender fields rather than all uint32s.
+            if not count or not fields or not fields <= record_size <= fields * 4 or dbc.stat().st_size < 20 + count * record_size + strings:
                 raise RealmError("Incomplete DBC records: " + name)
     if not any((path / "maps").glob("*.map")) or not any((path / "vmaps").glob("*.vmtree")):
         raise RealmError("Terrain or collision data is incomplete.")

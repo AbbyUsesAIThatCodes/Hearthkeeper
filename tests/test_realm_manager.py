@@ -66,6 +66,11 @@ class RealmManagerTests(unittest.TestCase):
                 self.realm.start()
             check.assert_not_called()
 
+    def test_packed_byte_dbc_records_are_accepted(self):
+        (self.source / "dbc/CharStartOutfit.dbc").write_bytes(
+            b"WDBC" + struct.pack("<4I", 1, 77, 296, 1) + bytes(297))
+        validate_server_data(self.source)
+
     def test_failed_import_never_reports_installed_or_runs_extraction(self):
         commands = []
         def control(command, payload=None):

@@ -59,7 +59,7 @@ The command-line archive tools and optional offline HTML export remain available
 
 ## Validation and remaining gates
 
-The project has 26 unit tests covering archive behavior and realm boundaries.
+The project has 27 unit tests covering archive behavior and realm boundaries.
 The native acceptance check exercises actual Qt widgets, including archive search,
 module/coverage views, literal archived text, and background work. Windows CI builds
 and tests the packaged executable.
