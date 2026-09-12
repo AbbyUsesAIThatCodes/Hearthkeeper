@@ -1,0 +1,37 @@
+name: Pinned realm build
+on:
+  pull_request:
+    paths:
+      - 'hearthkeeper/server/**'
+      - 'hearthkeeper/data/realm.lock.json'
+      - 'tests/realm_build_smoke.py'
+      - '.github/workflows/realm-build.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: realm-build-${{ github.ref }}
+  cancel-in-progress: false
+jobs:
+  build-and-authenticate:
+    runs-on: ubuntu-latest
+    timeout-minutes: 150
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: docker/setup-buildx-action@v3
+      - name: Prepare disposable realm build
+        id: realm
+        run: python tests/realm_build_smoke.py prepare
+      - name: Compile core, Playerbots and Individual Progression
+        uses: docker/build-push-action@v6
+        with:
+          context: var/ci-realm/bundle
+          load: true
+          tags: ${{ steps.realm.outputs.image }}
+          cache-from: type=gha,scope=hearthkeeper-realm
+          cache-to: type=gha,mode=max,scope=hearthkeeper-realm
+      - name: Import actual SQL and verify account authentication
+        run: python tests/realm_build_smoke.py probe
