@@ -26,6 +26,15 @@ This is a development preview; restoration and a playable realm are not complete
 The build gate has no game assets. Completing extraction, world startup, in-game
 play, WoWee setup, and restoration still requires subsequent acceptance work.
 
+## 0.1.0a3 — First Campfire source catalog preview
+
+- Seven providers and 22 catalog offerings, with original/Classic client distinctions.
+- GitHub source snapshots with exact commit identity, completed-file imports, and verification.
+- Native source filters and saved-copy browsing; historical/unavailable source labeling.
+- Next: Luna transport, complete client verification/setup, and one tested remote realm profile.
+
+See [the catalog guide](SOURCE_CATALOG.md) for coverage and acquisition limits.
+
 ## 0.1.0 — First Campfire (release gate)
 
 1. Build the pinned core/modules in the dedicated development environment.

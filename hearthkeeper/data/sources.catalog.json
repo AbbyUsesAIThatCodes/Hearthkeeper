@@ -1,0 +1,547 @@
+{
+  "schema_version": 1,
+  "reviewed_on": "2026-09-13",
+  "providers": [
+    {
+      "id": "chromiecraft",
+      "name": "ChromieCraft",
+      "url": "https://chromiecraft.com/en/downloads/",
+      "description": "Client downloads and optional graphics patches; their public realm is separate from Luna."
+    },
+    {
+      "id": "azerothcore",
+      "name": "AzerothCore ecosystem",
+      "url": "https://www.azerothcore.org/",
+      "description": "Wrath server source plus the bot and progression projects used by First Campfire."
+    },
+    {
+      "id": "cmangos",
+      "name": "CMaNGOS",
+      "url": "https://github.com/cmangos",
+      "description": "Original Vanilla, Burning Crusade, and Wrath cores with separate content databases."
+    },
+    {
+      "id": "cata-preservation",
+      "name": "Cataclysm Preservation",
+      "url": "https://github.com/The-Cataclysm-Preservation-Project/TrinityCore",
+      "description": "Original Cataclysm server source and database releases."
+    },
+    {
+      "id": "skyfire",
+      "name": "Project SkyFire",
+      "url": "https://github.com/ProjectSkyfire/SkyFire_548",
+      "description": "Mists of Pandaria server source and database releases."
+    },
+    {
+      "id": "trinitycore",
+      "name": "TrinityCore",
+      "url": "https://github.com/TrinityCore/TrinityCore",
+      "description": "Separate original Wrath, Cataclysm Classic, and moving modern-client branches."
+    },
+    {
+      "id": "ashamane",
+      "name": "AshamaneProject",
+      "url": "https://github.com/AshamaneProject/AshamaneCore",
+      "description": "Historical Legion, Battle for Azeroth, and Shadowlands branches. Maintenance and playability need assessment."
+    }
+  ],
+  "offerings": [
+    {
+      "id": "chromiecraft-client",
+      "provider": "chromiecraft",
+      "name": "Clean Windows client",
+      "kind": "Client",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://chromiecraft.com/en/downloads/",
+      "notes": "The provider describes a clean client with its realmlist already configured. Direct download, torrent/magnet, and two mirrors are listed on the source page. Download there, then archive the completed file here. Its build and contents still need verification before use on Luna.",
+      "acquisition": "download_page",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://chromiecraft.com/en/downloads/"
+      ],
+      "reviewed_on": "2026-09-13"
+    },
+    {
+      "id": "chromiecraft-hd",
+      "provider": "chromiecraft",
+      "name": "Optional HD graphics patches",
+      "kind": "Client patch",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://chromiecraft.com/en/downloads/",
+      "notes": "Optional graphics changes are separate from the clean client. The provider warns of possible glitches. Keep the original client and archive each patch separately; this preview does not apply patches.",
+      "acquisition": "download_page",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://chromiecraft.com/en/downloads/"
+      ],
+      "reviewed_on": "2026-09-13"
+    },
+    {
+      "id": "acore",
+      "provider": "azerothcore",
+      "name": "AzerothCore standard",
+      "kind": "Server core",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/azerothcore/azerothcore-wotlk",
+      "notes": "Standard upstream source. Catalog snapshots do not replace the pinned Playerbot core used by the existing Realm installer.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/azerothcore/azerothcore-wotlk"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "azerothcore/azerothcore-wotlk",
+      "ref": "master"
+    },
+    {
+      "id": "acore-playerbot",
+      "provider": "azerothcore",
+      "name": "AzerothCore Playerbot flavor",
+      "kind": "Server core",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/mod-playerbots/azerothcore-wotlk",
+      "notes": "Requires the matching Playerbots module. First Campfire uses specific pinned commits; a newer catalog snapshot is not automatically an upgrade.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/mod-playerbots/azerothcore-wotlk"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "mod-playerbots/azerothcore-wotlk",
+      "ref": "Playerbot"
+    },
+    {
+      "id": "playerbots",
+      "provider": "azerothcore",
+      "name": "Playerbots",
+      "kind": "Server module",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/mod-playerbots/mod-playerbots",
+      "notes": "Requires the compatible Playerbot core flavor. Source availability does not establish compatibility with arbitrary cores or module revisions.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/mod-playerbots/mod-playerbots"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "mod-playerbots/mod-playerbots",
+      "ref": "master"
+    },
+    {
+      "id": "individual-progression",
+      "provider": "azerothcore",
+      "name": "Individual Progression",
+      "kind": "Server module",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/ZhengPeiRu21/mod-individual-progression",
+      "notes": "Progression within an original Wrath realm. It does not change the client into a Vanilla or Burning Crusade client. Optional SQL and client patches must be evaluated separately.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/ZhengPeiRu21/mod-individual-progression"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "ZhengPeiRu21/mod-individual-progression",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-classic-core",
+      "provider": "cmangos",
+      "name": "Vanilla core",
+      "kind": "Server core",
+      "era": "Vanilla",
+      "client": {
+        "family": "Original",
+        "version": "1.12.x",
+        "build": null
+      },
+      "page_url": "https://github.com/cmangos/mangos-classic",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate. Exact supported Vanilla build must be checked against the selected revision.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/mangos-classic"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/mangos-classic",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-classic-db",
+      "provider": "cmangos",
+      "name": "Vanilla database",
+      "kind": "World database",
+      "era": "Vanilla",
+      "client": {
+        "family": "Original",
+        "version": "1.12.x",
+        "build": null
+      },
+      "page_url": "https://github.com/cmangos/classic-db",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate. Exact supported Vanilla build must be checked against the selected revision.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/classic-db"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/classic-db",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-tbc-core",
+      "provider": "cmangos",
+      "name": "Burning Crusade core",
+      "kind": "Server core",
+      "era": "The Burning Crusade",
+      "client": {
+        "family": "Original",
+        "version": "2.4.3",
+        "build": 8606
+      },
+      "page_url": "https://github.com/cmangos/mangos-tbc",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/mangos-tbc"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/mangos-tbc",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-tbc-db",
+      "provider": "cmangos",
+      "name": "Burning Crusade database",
+      "kind": "World database",
+      "era": "The Burning Crusade",
+      "client": {
+        "family": "Original",
+        "version": "2.4.3",
+        "build": 8606
+      },
+      "page_url": "https://github.com/cmangos/tbc-db",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/tbc-db"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/tbc-db",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-wotlk-core",
+      "provider": "cmangos",
+      "name": "Wrath core",
+      "kind": "Server core",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/cmangos/mangos-wotlk",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/mangos-wotlk"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/mangos-wotlk",
+      "ref": "master"
+    },
+    {
+      "id": "cmangos-wotlk-db",
+      "provider": "cmangos",
+      "name": "Wrath database",
+      "kind": "World database",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/cmangos/wotlk-db",
+      "notes": "Pair this core and its matching CMaNGOS database at compatible revisions. The database contains world content, not the characters or accounts on a public server. Client files are separate.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/cmangos/wotlk-db"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "cmangos/wotlk-db",
+      "ref": "master"
+    },
+    {
+      "id": "cata-core",
+      "provider": "cata-preservation",
+      "name": "Original Cataclysm core",
+      "kind": "Server core",
+      "era": "Cataclysm",
+      "client": {
+        "family": "Original",
+        "version": "4.3.4",
+        "build": 15595
+      },
+      "page_url": "https://github.com/The-Cataclysm-Preservation-Project/TrinityCore",
+      "notes": "Original Cataclysm, separate from Cataclysm Classic. Matching database releases are a separate download. No Hearthkeeper installer or gameplay test yet.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/The-Cataclysm-Preservation-Project/TrinityCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "The-Cataclysm-Preservation-Project/TrinityCore",
+      "ref": "master"
+    },
+    {
+      "id": "cata-db",
+      "provider": "cata-preservation",
+      "name": "Cataclysm database releases",
+      "kind": "World database",
+      "era": "Cataclysm",
+      "client": {
+        "family": "Original",
+        "version": "4.3.4",
+        "build": 15595
+      },
+      "page_url": "https://github.com/The-Cataclysm-Preservation-Project/TrinityCore/releases",
+      "notes": "Choose a database release compatible with the selected preservation-core revision. Archive the downloaded release file; automatic SQL import is not part of this catalog.",
+      "acquisition": "download_page",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/The-Cataclysm-Preservation-Project/TrinityCore/releases"
+      ],
+      "reviewed_on": "2026-09-13"
+    },
+    {
+      "id": "skyfire-core",
+      "provider": "skyfire",
+      "name": "SkyFire 5.4.8 core",
+      "kind": "Server core",
+      "era": "Mists of Pandaria",
+      "client": {
+        "family": "Original",
+        "version": "5.4.8",
+        "build": 18414
+      },
+      "page_url": "https://github.com/ProjectSkyfire/SkyFire_548",
+      "notes": "Targets original Mists 5.4.8 build 18414. Database releases are separate. Source preservation works independently of future installation and gameplay testing.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/ProjectSkyfire/SkyFire_548"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "ProjectSkyfire/SkyFire_548",
+      "ref": "main"
+    },
+    {
+      "id": "skyfire-db",
+      "provider": "skyfire",
+      "name": "SkyFire database releases",
+      "kind": "World database",
+      "era": "Mists of Pandaria",
+      "client": {
+        "family": "Original",
+        "version": "5.4.8",
+        "build": 18414
+      },
+      "page_url": "https://github.com/ProjectSkyfire/SkyFire_548/releases",
+      "notes": "Upstream database release page. Core and database compatibility must be established before import. Client files are not included.",
+      "acquisition": "download_page",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/ProjectSkyfire/SkyFire_548/releases"
+      ],
+      "reviewed_on": "2026-09-13"
+    },
+    {
+      "id": "trinity-wrath",
+      "provider": "trinitycore",
+      "name": "TrinityCore original Wrath",
+      "kind": "Server core",
+      "era": "Wrath of the Lich King",
+      "client": {
+        "family": "Original",
+        "version": "3.3.5a",
+        "build": 12340
+      },
+      "page_url": "https://github.com/TrinityCore/TrinityCore",
+      "notes": "This is a different core from AzerothCore, despite targeting the same client. Databases and modules are not interchangeable.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/TrinityCore/TrinityCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "TrinityCore/TrinityCore",
+      "ref": "3.3.5"
+    },
+    {
+      "id": "trinity-cata-classic",
+      "provider": "trinitycore",
+      "name": "TrinityCore Cataclysm Classic",
+      "kind": "Server core",
+      "era": "Cataclysm",
+      "client": {
+        "family": "Classic re-release",
+        "version": "4.4.2",
+        "build": 60895
+      },
+      "page_url": "https://github.com/TrinityCore/TrinityCore",
+      "notes": "Classic re-release protocol, incompatible with original Cataclysm 4.3.4. Check the selected revision for its exact client target.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/TrinityCore/TrinityCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "TrinityCore/TrinityCore",
+      "ref": "cata_classic"
+    },
+    {
+      "id": "trinity-modern",
+      "provider": "trinitycore",
+      "name": "TrinityCore modern branch",
+      "kind": "Server core",
+      "era": "Modern / moving target",
+      "client": {
+        "family": "Modern",
+        "version": "See selected revision",
+        "build": null
+      },
+      "page_url": "https://github.com/TrinityCore/TrinityCore",
+      "notes": "The supported build changes. Read the selected commit documentation before obtaining a client. A modern protocol target does not establish complete expansion content.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/TrinityCore/TrinityCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "TrinityCore/TrinityCore",
+      "ref": "master"
+    },
+    {
+      "id": "ashamane-legion",
+      "provider": "ashamane",
+      "name": "Ashamane Legion",
+      "kind": "Server core",
+      "era": "Legion",
+      "client": {
+        "family": "Original",
+        "version": "7.3.5",
+        "build": 26972
+      },
+      "page_url": "https://github.com/AshamaneProject/AshamaneCore",
+      "notes": "Historical branch target advertised by the project. Maintenance, build success, world completeness, and compatible client acquisition are unverified. Preserve separately from active realms.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/AshamaneProject/AshamaneCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "AshamaneProject/AshamaneCore",
+      "ref": "legion"
+    },
+    {
+      "id": "ashamane-bfa",
+      "provider": "ashamane",
+      "name": "Ashamane Battle for Azeroth",
+      "kind": "Server core",
+      "era": "Battle for Azeroth",
+      "client": {
+        "family": "Original",
+        "version": "8.3.7",
+        "build": 35284
+      },
+      "page_url": "https://github.com/AshamaneProject/AshamaneCore",
+      "notes": "The project description advertises BFA 8.3.7 build 35284, but refs/heads/bfa was unavailable when checked on 2026-09-13. This is a historical reference, not a working source download or installer. A replacement source must be reviewed before acquisition can be enabled.",
+      "acquisition": "download_page",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/AshamaneProject/AshamaneCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "availability": "Historical reference; advertised branch unavailable"
+    },
+    {
+      "id": "ashamane-shadowlands",
+      "provider": "ashamane",
+      "name": "Ashamane Shadowlands",
+      "kind": "Server core",
+      "era": "Shadowlands",
+      "client": {
+        "family": "Original",
+        "version": "9.0.2",
+        "build": 36949
+      },
+      "page_url": "https://github.com/AshamaneProject/AshamaneCore",
+      "notes": "Historical branch target advertised by the project. Maintenance, build success, world completeness, and compatible client acquisition are unverified. Preserve separately from active realms.",
+      "acquisition": "github_snapshot",
+      "installation": "Not integrated",
+      "gameplay": "Not tested by Hearthkeeper",
+      "evidence_urls": [
+        "https://github.com/AshamaneProject/AshamaneCore"
+      ],
+      "reviewed_on": "2026-09-13",
+      "repository": "AshamaneProject/AshamaneCore",
+      "ref": "master"
+    }
+  ]
+}

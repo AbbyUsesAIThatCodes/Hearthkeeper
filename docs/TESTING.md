@@ -1,7 +1,7 @@
 # Test the desktop PR
 
-This branch is `feature/desktop-realm-manager` and the version is **0.1.0a2**.
-It builds on the still-separate archive preview PR. The PR description records
+This branch is `feature/source-catalog` and the version is **0.1.0a3**.
+It builds on the still-open desktop realm manager PR #5. The PR description records
 the exact commit and CI outcomes; do not infer gameplay readiness from packaging checks.
 
 ## Without Docker or game files
@@ -21,6 +21,14 @@ The fixture is fictional and incomplete. It contains no game assets. The native
 viewer works offline. The original HTML demo remains available through
 **Start-Archive-Demo.bat**.
 
+## Source catalog proof of concept
+
+Follow [Sources → catalog and saved copies](SOURCE_CATALOG.md). Try ChromieCraft’s
+source page, filter SkyFire to Mists, save an Individual Progression source snapshot,
+and import a small file before trying a large client archive. Verify the saved copy
+and confirm that no realm started or changed. Imported files are associated with a
+catalog offering by your selection; their client builds are not inspected yet.
+
 ## With Docker and matching files
 
 Follow [realm setup](REALM_SETUP.md). Record the first failed stage and its final
@@ -34,7 +42,7 @@ successful backup. Keep normal realm backups until restoration is tested.
 
 ## Automated evidence
 
-- 27 unit tests cover archive preservation, ownership boundaries, damaged files,
+- 36 unit tests cover archive preservation, ownership boundaries, damaged files,
   local-only Compose bindings, read-only game mounts, incomplete data, failed-import
   state, concurrent-operation locks, remote Docker rejection, and password redaction.
 - The native Qt smoke test checks startup without processes/browser calls, archive

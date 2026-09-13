@@ -32,7 +32,7 @@ def run(application, directory):
     with patch("subprocess.Popen", side_effect=AssertionError("Unexpected process launch")), patch.object(webbrowser, "open", side_effect=AssertionError("Unexpected browser")):
         window = MainWindow(remember=False)
         window.show(); application.processEvents(); QTest.qWait(50)
-        assert window.pages.count() == 5
+        assert window.pages.count() == 6
         brand = window.findChild(type(window.card_values[0]), "brand")
         assert brand.fontMetrics().horizontalAdvance(brand.text()) <= brand.width(), "Brand is clipped"
         window.grab().save(str(directory / "desktop-realm.png"))
@@ -56,6 +56,38 @@ def run(application, directory):
         window.grab().save(str(directory / "desktop-archive.png"))
         window.resize(980, 700); application.processEvents(); QTest.qWait(50)
         window.grab().save(str(directory / "desktop-small.png"))
+        # Sources are browsable offline; choosing a provider never fetches or installs content.
+        window.navigate(4)
+        window.source_provider.setCurrentIndex(window.source_provider.findData("chromiecraft"))
+        application.processEvents()
+        assert window.source_tree.topLevelItemCount() == 1
+        assert window.source_tree.topLevelItem(0).childCount() == 2
+        assert not window.source_fetch.isEnabled()
+        assert window.source_open.isEnabled() and window.source_import.isEnabled()
+        window.source_provider.setCurrentIndex(window.source_provider.findData("skyfire"))
+        assert window.source_fetch.isEnabled()
+        assert "18414" in window.source_detail_text
+        window.source_search.setText("impossible-match")
+        assert window.source_tree.topLevelItemCount() == 0
+        assert not window.source_fetch.isEnabled() and not window.source_import.isEnabled()
+        window.source_search.clear()
+        application.processEvents(); QTest.qWait(50)
+        window.grab().save(str(directory / "desktop-sources-small.png"))
+        window.resize(1240, 880)
+        window.source_provider.setCurrentIndex(0)
+        application.processEvents(); QTest.qWait(50)
+        window.grab().save(str(directory / "desktop-sources.png"))
+        from .sources import import_file, verify_saved
+        fixture_file = directory / "fictional-download.zip"
+        fixture_file.write_bytes(b"Fictional bytes, not game data")
+        window.source_root = directory / "source-copies"
+        saved = import_file(window.selected_source(), fixture_file, window.source_root)
+        window.source_saved_complete(saved)
+        assert window.source_saved.rowCount() == 1 and window.selected_source_copy() == saved
+        assert "Bytes match" in verify_saved(saved)
+        application.processEvents(); QTest.qWait(50)
+        window.grab().save(str(directory / "desktop-saved-sources.png"))
+        window.navigate(2)
         snapshot["tables"]["characters.characters"]["rows"][0]["name"] = "<img src=x onerror=alert(1)>"
         malicious = write_archive(directory / "escaped.hearth", snapshot)
         panel.load(malicious)
@@ -85,4 +117,4 @@ def run(application, directory):
             raise AssertionError("An existing shortcut was replaced")
     window.close(); application.processEvents()
     (directory / "result.json").write_text(json.dumps({"passed": True, "native_widgets": True,
-        "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes"]}))
+        "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes", "source filtering", "acquisition availability", "saved source copy"]}))

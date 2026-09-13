@@ -1,6 +1,6 @@
 # Hearthkeeper
 
-**0.1.0a2 — First Campfire · native desktop development preview**
+**0.1.0a3 — First Campfire · native desktop development preview**
 
 A desktop home for your personal Azeroth: install and manage a progression realm,
 preserve character records, and eventually build your own towns, instances, and regions.
@@ -9,17 +9,17 @@ The main application uses native Qt windows. It does not run in a browser.
 ## Open the desktop app
 
 **Packaged Windows app (no Python):** run **Download-Windows-Preview.bat**, or open
-[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fdesktop-realm-manager).
+[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fsource-catalog).
 Sign into GitHub **in your browser**; GitHub Desktop's sign-in is separate.
-Open a successful run for `feature/desktop-realm-manager`, scroll to **Artifacts**,
-and select **Hearthkeeper-0.1.0a2-Windows**. Extract the entire ZIP, then open
+Open a successful run for `feature/source-catalog`, scroll to **Artifacts**,
+and select **Hearthkeeper-0.1.0a3-Windows**. Extract the entire ZIP, then open
 **Hearthkeeper.exe**. Keep the accompanying `_internal` folder beside it.
 No Python installation is needed. Click **Desktop shortcut** once to create an icon.
 This development build is unsigned; a signed distribution is a later packaging step.
 Artifacts expire after 30 days. A direct artifact link can show a 404 when you are
 signed out, lack access, or the artifact has expired; use the build list above.
 
-**GitHub Desktop / source:** fetch and select `feature/desktop-realm-manager`,
+**GitHub Desktop / source:** fetch and select `feature/source-catalog`,
 then run **Start-Hearthkeeper.bat**. This route needs Python **3.11–3.13**
 (3.12 recommended). The launcher searches for an installed supported version even
 when Windows defaults to Python 3.14 or another unsupported version. If none is
@@ -35,6 +35,23 @@ anything or opening the app, run `Start-Hearthkeeper.bat --check-python` in a te
 
 You can explore **Archives → Meet Brindle · demo** without Docker, game files,
 or an account. This is the same fictional archive, now displayed in native widgets.
+
+## Explore sources and preserve downloads
+
+Open **Sources** without Docker or game files. Expand a provider to see its clients,
+cores, modules, patches, or databases. Use the source, era, and search filters.
+**Details** explains the target client and what remains unverified.
+
+- **Source page** opens the provider website, including ChromieCraft’s client and mirror choices.
+- **Save snapshot** resolves an available GitHub branch and downloads its exact source commit.
+- **Import file** copies one completed download into the selected archive location.
+- **Saved copies → Verify selected copy** checks the recorded SHA-256 and byte count.
+
+This is a source catalog and preservation proof of concept. It does not add SSH
+installation, automatically download/install game clients, or launch alternate
+cores. A catalog entry is not a playability certification. Ashamane’s advertised
+BFA branch is retained as a historical reference because the branch is unavailable.
+See [the source catalog guide](docs/SOURCE_CATALOG.md).
 
 ## Install your realm
 
@@ -65,6 +82,7 @@ database volume use the selected local Docker context. See [setup details](docs/
 | Characters | Create ordinary or GM accounts, list characters, capture a logged-out character |
 | Archives | Native viewer, search, checksum validation, module records, coverage, snapshot comparison |
 | Backups | Stop gameplay and save SQL databases, configuration, credentials, and source pins |
+| Sources | Browse seven providers, preserve exact GitHub source snapshots, import completed downloads, and verify saved copies |
 | Workshop | Roadmap for towns, instances, and regions; authoring tools are planned |
 
 The command-line archive tools and optional offline HTML export remain available.
@@ -72,7 +90,7 @@ The command-line archive tools and optional offline HTML export remain available
 
 ## Validation and remaining gates
 
-The project has 27 unit tests covering archive behavior and realm boundaries.
+The project has 36 unit tests covering archive behavior, realm boundaries, source preservation, and failure handling.
 The native acceptance check exercises actual Qt widgets, including archive search,
 module/coverage views, literal archived text, and background work. Windows CI builds
 and tests the packaged executable.
@@ -95,6 +113,7 @@ Runtime Ubuntu/MySQL tags and apt dependencies are not fully locked by digest.
 - [Archive capture and limitations](docs/ARCHIVES.md)
 - [Access boundaries](docs/ACCESS.md)
 - [Roadmap and content workshop](docs/ROADMAP.md)
+- [Source catalog and saved copies](docs/SOURCE_CATALOG.md)
 - [Upstream source references](docs/SOURCES.md)
 - [Third-party notices](THIRD_PARTY_NOTICES.md)
 
