@@ -489,10 +489,12 @@ class MainWindow(QMainWindow):
                 self.game_timer.timeout.connect(self.game_tick)
             self.game_timer.start()
             self.update_play_state()
-        self.run_job("Preparing your adventure", lambda runner: start_for_play(ManagedRealm(path, runner), client.executable, client.locale), launch)
+        self.run_job("Preparing your adventure", lambda runner: start_for_play(ManagedRealm(path, runner), client.executable, client.locale), launch, cancel_callback_on_stop=True)
 
     def game_tick(self):
         if self.game_process is not None and self.game_process.poll() is not None:
+            exit_code = self.game_process.returncode
+            self.activity.appendPlainText("WoW closed." if exit_code == 0 else "WoW exited with code " + str(exit_code) + ". Check the game installation if it closed unexpectedly.")
             self.game_process = None
             self.game_timer.stop()
             self.update_play_state()
@@ -758,7 +760,7 @@ class MainWindow(QMainWindow):
         backups = sorted((realm.path / "backups").glob("*/manifest.json"), reverse=True)
         self.backup_list.setPlainText("\n".join(str(path.parent) for path in backups) or "No completed backups yet.")
 
-    def run_job(self, title, function, callback=None):
+    def run_job(self, title, function, callback=None, *, cancel_callback_on_stop=False):
         if self.worker:
             QMessageBox.information(self, "Operation in progress", "Let the current operation finish first.")
             return
@@ -766,6 +768,7 @@ class MainWindow(QMainWindow):
         self.activity.appendPlainText("\n" + title)
         self.worker = Worker(function)
         worker = self.worker
+        worker.cancel_callback_on_stop = cancel_callback_on_stop
         worker.line.connect(self.activity.appendPlainText)
         worker.finished.connect(lambda: self.job_finished(worker, callback))
         for action in self.actions:
@@ -791,6 +794,8 @@ class MainWindow(QMainWindow):
                 self.activity.appendPlainText("NEEDS ATTENTION · " + worker.error)
                 self.card_values[2].setText("Check activity")
                 QMessageBox.warning(self, "Operation needs attention", worker.error)
+            elif worker.cancel_callback_on_stop and worker.runner.stop_after_step.is_set():
+                self.activity.appendPlainText("Game launch cancelled. The realm may still be running.")
             elif callback:
                 callback(worker.result)
             elif worker.result is not None:

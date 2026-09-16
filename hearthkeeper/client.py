@@ -135,6 +135,8 @@ def start_for_play(realm, executable, locale):
         raise ClientError('Play was cancelled before launching the game. The realm may still be running.')
     if not services_ready(realm.status()):
         raise ClientError('The realm is not ready yet. Check Activity or refresh its status; the game was not launched.')
+    if realm.runner.stop_after_step.is_set():
+        raise ClientError('Play was cancelled before launching the game. The realm may still be running.')
     return client
 
 

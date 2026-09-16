@@ -177,6 +177,13 @@ def exercise_home(application, window, directory):
             window.play(); finish_worker()
             launch.assert_not_called(); warning.assert_called_once()
             assert "Fictional Docker failure" in window.activity.toPlainText()
+        # Cancellation after the worker returns but before Qt delivers finished must still suppress launch.
+        late_launch = Mock()
+        window.run_job("Late cancellation test", lambda runner: "complete", late_launch, cancel_callback_on_stop=True)
+        assert window.worker.wait(10000)
+        window.worker.runner.stop_after_step.set()
+        finish_worker()
+        late_launch.assert_not_called()
         # Reopening the same realm restores the saved executable and locale.
         window.select_realm(realm.path)
         assert window.client.executable == (game / "Wow.exe").resolve()

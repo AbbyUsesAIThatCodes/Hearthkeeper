@@ -87,6 +87,16 @@ class ClientTests(unittest.TestCase):
         realm = self.realm([[], []])
         with self.assertRaisesRegex(ClientError, 'not ready'):
             start_for_play(realm, self.client.executable, 'enUS')
+        realm = self.realm([])
+        calls = []
+        def cancelled_during_final_check():
+            calls.append(True)
+            if len(calls) == 2:
+                realm.runner.stop_after_step.set()
+            return self.ready
+        realm.status.side_effect = cancelled_during_final_check
+        with self.assertRaisesRegex(ClientError, 'cancelled'):
+            start_for_play(realm, self.client.executable, 'enUS')
         realm = self.realm([[]])
         realm.start.side_effect = RuntimeError('Docker unavailable')
         with self.assertRaisesRegex(RuntimeError, 'Docker unavailable'):
@@ -106,7 +116,7 @@ class ClientTests(unittest.TestCase):
         prepare_realmlist(self.client)
         with patch('subprocess.Popen') as launch:
             launch_client(self.client)
-        launch.assert_called_once_with([str(self.client.executable)], cwd=str(self.root),
+        launch.assert_called_once_with([str(self.client.executable)], cwd=str(self.root.resolve()),
             stdin=subprocess.DEVNULL, stdout=subprocess.DEVNULL, stderr=subprocess.DEVNULL)
         self.client.realmlist.write_text('set realmlist other.example\n')
         with patch('subprocess.Popen') as launch:
