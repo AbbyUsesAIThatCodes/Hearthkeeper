@@ -12,7 +12,7 @@ from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
     QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout,
     QHeaderView, QInputDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
-    QProgressBar, QPushButton, QScrollArea, QSpinBox, QSplitter, QStackedWidget,
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QSplitter, QStackedWidget,
     QTableWidget, QTableWidgetItem, QTabWidget, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from .client import (ClientError, LOCALES, inspect_client, realm_address_matches,
@@ -334,6 +334,7 @@ class MainWindow(QMainWindow):
         inside.addWidget(label("YOUR GAME INSTALLATION", "eyebrow"))
         self.client_title = label("Bring your adventurer home", "clientTitle"); inside.addWidget(self.client_title)
         self.client_notice = label("Choose your original Wrath client: Wow.exe, version 3.3.5a / build 12340.")
+        self.client_notice.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         inside.addWidget(self.client_notice)
         row = QHBoxLayout()
         self.choose_client_button = self.action("Choose Wow.exe…", self.choose_client)

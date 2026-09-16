@@ -160,7 +160,12 @@ def exercise_home(application, window, directory):
         window.grab().save(str(directory / "desktop-home-ready.png"))
         window.resize(980, 700); application.processEvents(); QTest.qWait(30)
         scroll = window.pages.widget(0)
-        assert scroll.horizontalScrollBar().maximum() == 0, "Home overflows horizontally"
+        if scroll.horizontalScrollBar().maximum():
+            from PySide6.QtWidgets import QWidget
+            window.grab().save(str(directory / "desktop-home-overflow.png"))
+            details = [(type(item).__name__, item.objectName(), item.minimumSizeHint().width(), item.width(), getattr(item, "text", lambda: "")()[:100])
+                       for item in scroll.widget().findChildren(QWidget) if item.minimumSizeHint().width() > scroll.viewport().width() - 100]
+            raise AssertionError("Home overflows horizontally: " + str((scroll.viewport().width(), scroll.widget().width(), details)))
         scroll.ensureWidgetVisible(window.play_button); application.processEvents()
         window.grab().save(str(directory / "desktop-home-small.png"))
         process = Mock(); process.poll.return_value = None
