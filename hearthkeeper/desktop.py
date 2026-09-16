@@ -10,7 +10,7 @@ import uuid
 from PySide6.QtCore import Qt, QSettings, QStandardPaths, QThread, Signal, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
-    QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout,
+    QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QGridLayout, QHBoxLayout,
     QHeaderView, QInputDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QSplitter, QStackedWidget,
     QTableWidget, QTableWidgetItem, QTabWidget, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
@@ -353,17 +353,19 @@ class MainWindow(QMainWindow):
         row.addWidget(button("Realm backups", lambda: self.navigate(3))); row.addStretch(); layout.addLayout(row)
         tools_toggle = button("Realm tools ▸", lambda: None); tools_toggle.setCheckable(True)
         layout.addWidget(tools_toggle, alignment=Qt.AlignmentFlag.AlignLeft)
-        tools = QWidget(); tool_layout = QVBoxLayout(tools); tool_layout.setContentsMargins(0, 0, 0, 0)
-        row = QHBoxLayout()
-        row.addWidget(self.action("Install / Resume", lambda: self.realm_job("Installing realm", lambda realm: realm.install())))
-        row.addWidget(self.action("Start realm", lambda: self.realm_job("Starting realm", lambda realm: realm.start())))
-        row.addWidget(self.action("Stop realm", lambda: self.realm_job("Stopping realm", lambda realm: realm.stop())))
-        row.addWidget(self.action("Refresh status", self.refresh_status)); row.addStretch(); tool_layout.addLayout(row)
-        row = QHBoxLayout()
-        row.addWidget(self.action("Realm settings…", self.realm_settings))
-        row.addWidget(self.action("Check Docker", self.prerequisites))
-        row.addWidget(self.action("Server logs", lambda: self.realm_job("Reading server logs", lambda realm: realm.compose("logs", "--tail", "120", "auth", "world"))))
-        row.addStretch(); tool_layout.addLayout(row)
+        tools = QWidget(); tools.setObjectName("realmTools")
+        tool_layout = QGridLayout(tools); tool_layout.setContentsMargins(0, 0, 0, 0)
+        actions = [
+            ("Install / Resume", lambda: self.realm_job("Installing realm", lambda realm: realm.install())),
+            ("Start realm", lambda: self.realm_job("Starting realm", lambda realm: realm.start())),
+            ("Stop realm", lambda: self.realm_job("Stopping realm", lambda realm: realm.stop())),
+            ("Refresh status", self.refresh_status),
+            ("Realm settings…", self.realm_settings),
+            ("Check Docker", self.prerequisites),
+            ("Server logs", lambda: self.realm_job("Reading server logs", lambda realm: realm.compose("logs", "--tail", "120", "auth", "world"))),
+        ]
+        for index, (title, callback) in enumerate(actions):
+            tool_layout.addWidget(self.action(title, callback), index // 2, index % 2)
         tools.hide(); layout.addWidget(tools)
         tools_toggle.toggled.connect(tools.setVisible)
         tools_toggle.toggled.connect(lambda checked: tools_toggle.setText("Realm tools ▾" if checked else "Realm tools ▸"))
