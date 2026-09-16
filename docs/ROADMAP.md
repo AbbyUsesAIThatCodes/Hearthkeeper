@@ -11,7 +11,10 @@ and a gnome, entering the world, and fighting a wolf with the 0.1.0a3 setup.
 This establishes user-reported first-login success. Companion play, broader game
 systems, backup restoration, and remote deployment still need acceptance.
 
-Keep the following five milestones in order. These are planned capabilities.
+Keep the following five milestones in order. The first home-screen slice is
+implemented in 0.1.0a5 (see HOME.md): artwork/theme, client selection, connection
+backup, and the Play flow. Live Windows/WoW acceptance remains to be recorded.
+The remaining capabilities are planned.
 
 | Order | Milestone | Reviewable outcome |
 | --- | --- | --- |

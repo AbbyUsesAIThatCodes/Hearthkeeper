@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.0a5 — Through the Gates
+
+- Native Warcraft-inspired home screen, winter-gate vector artwork, framed navigation icons,
+  dark metal controls, parchment game card, and clear Play readiness messaging.
+- Windows Wow.exe selection stored per realm, version-resource inspection for 3.3.5a/12340,
+  locale selection, required-file checks, and explicit local connection setup with an exact-byte backup.
+- Play revalidates the client, starts services when needed, checks their health, and launches
+  the game with its own working directory. Failed/cancelled startup does not launch it.
+- Companion command guide; existing realm operations remain under expandable Realm tools.
+- Unit coverage for client/connection/startup behavior and native smoke coverage for the full
+  button flow, saved selection, failed startup, duplicate clicks, and small-window layout.
+- The earlier a4 draft mentioned in conversation could not be verified in the repository;
+  a5 avoids reusing its version. Luna, automated downloads, and extension installation remain planned.
+
+
 ## 0.1.0a3 — First Campfire source catalog preview — 2026-09-13
 
 - Added a native Sources page with seven providers and 22 client, server, module,

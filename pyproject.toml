@@ -4,7 +4,7 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "hearthkeeper"
-version = "0.1.0a3"
+version = "0.1.0a5"
 description = "A local archive desk and development toolkit for a personal Azeroth"
 requires-python = ">=3.11"
 dependencies = []

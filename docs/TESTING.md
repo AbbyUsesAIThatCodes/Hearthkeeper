@@ -1,6 +1,6 @@
 # Test the desktop PR
 
-This branch is `feature/source-catalog` and the version is **0.1.0a3**.
+This branch is `feature/warcraft-home` and the version is **0.1.0a5**.
 It builds on the still-open desktop realm manager PR #5. The PR description records
 the exact commit and CI outcomes; do not infer gameplay readiness from packaging checks.
 
@@ -42,7 +42,7 @@ successful backup. Keep normal realm backups until restoration is tested.
 
 ## Automated evidence
 
-- 36 unit tests cover archive preservation, ownership boundaries, damaged files,
+- 48 unit tests cover archive preservation, ownership boundaries, damaged files,
   local-only Compose bindings, read-only game mounts, incomplete data, failed-import
   state, concurrent-operation locks, remote Docker rejection, and password redaction.
 - The native Qt smoke test checks startup without processes/browser calls, archive
@@ -58,3 +58,22 @@ successful backup. Keep normal realm backups until restoration is tested.
 
 Game data extraction, world startup, in-game behavior, and restore remain separate
 acceptance gates. CI's placeholder data is never passed to a worldserver.
+
+## Home and Play acceptance
+
+See [HOME.md](HOME.md) for the first-run path. Automated native acceptance uses
+fictional game files, a patched metadata reader, and mocked realm/process calls;
+no game binary or Docker service is launched. It exercises selection, refusing
+and accepting the connection change, original-byte backup, saved selection,
+healthy-realm launch, duplicate requests, failure reporting, and 980 × 700 layout.
+Unit tests cover stopped-realm startup, health failure, cancellation, wrong builds,
+multiple locales, missing files, backup failure, and the launch working directory.
+Windows unit tests read the real Python executable's version to exercise Win32 APIs.
+
+For live acceptance, use the existing realm and matching Windows client. Verify
+that Play launches it with the server initially stopped, and again with the realm
+already healthy. Verify the existing character after logging in. Confirm that a
+second Play click is disabled while this app's launched game is still running.
+Quit WoW and verify that Play becomes available again. Closing Hearthkeeper should
+leave the game and running realm alone. Keep the connection `.bak` if this client
+was previously pointed at a different server.

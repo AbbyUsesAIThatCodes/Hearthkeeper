@@ -1,6 +1,8 @@
 """Native Qt desktop application. No web view or local HTTP server."""
 from datetime import datetime, timezone
 import json
+import hashlib
+import os
 from pathlib import Path
 import sys
 import uuid
@@ -9,10 +11,12 @@ from PySide6.QtCore import Qt, QSettings, QStandardPaths, QThread, Signal, QUrl
 from PySide6.QtGui import QDesktopServices, QIcon
 from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComboBox,
     QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout,
-    QHeaderView, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
-    QProgressBar, QPushButton, QScrollArea, QSpinBox, QSplitter, QStackedWidget,
+    QHeaderView, QInputDialog, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
+    QProgressBar, QPushButton, QScrollArea, QSizePolicy, QSpinBox, QSplitter, QStackedWidget,
     QTableWidget, QTableWidgetItem, QTabWidget, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
+from .client import (ClientError, LOCALES, inspect_client, realm_address_matches,
+                     prepare_realmlist, start_for_play, launch_client, services_ready)
 from . import CODENAME, __version__
 from .archive import compare_archives, read_archive, write_archive
 from .database import capture, sqlite_reader
@@ -251,8 +255,13 @@ class MainWindow(QMainWindow):
         self.pending_path = None
         self.worker = None
         self.actions = []
+        self.client_choices = {}
+        self.client = None
+        self.game_process = None
+        self.game_realm_path = None
+        self.operation_title = ""
         self.pages = QStackedWidget()
-        root = QWidget(); root_layout = QHBoxLayout(root); root_layout.setContentsMargins(0, 0, 0, 0); root_layout.setSpacing(0)
+        root = QWidget(); root.setObjectName("root"); root_layout = QHBoxLayout(root); root_layout.setContentsMargins(0, 0, 0, 0); root_layout.setSpacing(0)
         sidebar = QFrame(); sidebar.setObjectName("sidebar"); sidebar.setFixedWidth(212)
         navigation = QVBoxLayout(sidebar); navigation.setContentsMargins(18, 28, 18, 22); navigation.setSpacing(9)
         emblem = QLabel(); emblem.setPixmap(QIcon(str(ASSETS / "hearthkeeper.svg")).pixmap(64, 64))
@@ -263,12 +272,13 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(max(212, brand.fontMetrics().horizontalAdvance(brand.text()) + 44))
         navigation.addWidget(label("YOUR OWN AZEROTH", "brandSub")); navigation.addSpacing(28)
         self.nav_buttons = []
-        for index, title in enumerate(("Realm", "Characters", "Archives", "Backups", "Sources", "Workshop")):
+        for index, title in enumerate(("Home", "Characters", "Archives", "Backups", "Sources", "Workshop")):
             item = QPushButton(title); item.setObjectName("nav"); item.setCheckable(True)
+            item.setIcon(QIcon(str(ASSETS / ("nav-" + ("home", "characters", "archives", "backups", "sources", "workshop")[index] + ".svg"))))
             item.clicked.connect(lambda checked=False, index=index: self.navigate(index))
             navigation.addWidget(item); self.nav_buttons.append(item)
         navigation.addStretch()
-        navigation.addWidget(label("First Campfire\n" + __version__, "brandSub"))
+        navigation.addWidget(label(CODENAME + "\n" + __version__, "brandSub"))
         navigation.addWidget(button("Desktop shortcut", self.shortcut))
         root_layout.addWidget(sidebar)
         right = QSplitter(Qt.Orientation.Vertical)
@@ -282,7 +292,7 @@ class MainWindow(QMainWindow):
         self.activity = text_view("Welcome. Opening Hearthkeeper does not start a server or install anything.")
         self.activity.setObjectName("activity"); self.activity.document().setMaximumBlockCount(1800)
         activity_layout.addWidget(self.activity)
-        right.addWidget(activity); right.setSizes([650, 190]); root_layout.addWidget(right, 1)
+        right.addWidget(activity); right.setSizes([740, 100]); root_layout.addWidget(right, 1)
         self.setCentralWidget(root)
         self.build_realm_page(); self.build_characters_page(); self.build_archives_page(); self.build_backups_page(); self.build_sources_page(); self.build_workshop_page()
         self.navigate(0)
@@ -300,36 +310,205 @@ class MainWindow(QMainWindow):
         return result
 
     def build_realm_page(self):
-        widget, layout = page("A home for your Azeroth.", "Install your progression realm, keep it running, and make room for the adventures ahead.")
-        self.realm_notice = label("Start with a new realm, or reopen one Hearthkeeper has already created.", "status")
-        layout.addWidget(self.realm_notice)
-        cards = QHBoxLayout()
-        self.card_values = []
-        for title, value in (("YOUR REALM", "No realm selected"), ("INSTALLATION", "Not started"), ("SERVICES", "Not checked")):
-            card = QFrame(); card.setObjectName("card"); inside = QVBoxLayout(card); inside.setContentsMargins(18, 18, 18, 18)
-            inside.addWidget(label(title, "cardTitle")); content = label(value, "cardValue"); inside.addWidget(content)
-            cards.addWidget(card); self.card_values.append(content)
+        content = QWidget()
+        layout = QVBoxLayout(content); layout.setContentsMargins(24, 20, 24, 20); layout.setSpacing(16)
+        hero = QFrame(); hero.setObjectName("hero"); hero.setMinimumHeight(218)
+        inside = QVBoxLayout(hero); inside.setContentsMargins(28, 24, 28, 24)
+        inside.addWidget(label("WRATH OF THE LICH KING", "eyebrow"))
+        inside.addWidget(label("Your next adventure\nbegins here.", "heroTitle"))
+        inside.addWidget(label("A familiar world. A hearth of your own.", "heroSubtitle"))
+        inside.addStretch(); layout.addWidget(hero)
+        cards = QHBoxLayout(); cards.setSpacing(12); self.card_values = []
+        for title, value in (("YOUR REALM", "Choose a realm"), ("INSTALLATION", "Not selected"), ("SERVICES", "Not checked")):
+            card = QFrame(); card.setObjectName("card"); inside = QVBoxLayout(card); inside.setContentsMargins(16, 13, 16, 13)
+            inside.addWidget(label(title, "cardTitle")); item = label(value, "cardValue"); inside.addWidget(item)
+            cards.addWidget(card, 1); self.card_values.append(item)
         layout.addLayout(cards)
+        self.realm_notice = label("Open your existing realm, or create a new home for your adventures.", "muted")
+        layout.addWidget(self.realm_notice)
         row = QHBoxLayout()
-        row.addWidget(self.action("New realm…", self.new_realm, True))
-        row.addWidget(self.action("Open realm…", self.open_realm))
-        row.addWidget(self.action("Check prerequisites", self.prerequisites))
+        row.addWidget(self.action("Open realm…", self.open_realm)); row.addWidget(self.action("New realm…", self.new_realm))
         row.addStretch(); layout.addLayout(row)
+        parchment = QFrame(); parchment.setObjectName("parchment")
+        inside = QVBoxLayout(parchment); inside.setContentsMargins(20, 16, 20, 16); inside.setSpacing(10)
+        inside.addWidget(label("YOUR GAME INSTALLATION", "eyebrow"))
+        self.client_title = label("Bring your adventurer home", "clientTitle"); inside.addWidget(self.client_title)
+        self.client_notice = label("Choose your original Wrath client: Wow.exe, version 3.3.5a / build 12340.")
+        self.client_notice.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
+        inside.addWidget(self.client_notice)
         row = QHBoxLayout()
-        row.addWidget(self.action("Install / Resume", lambda: self.realm_job("Installing realm", lambda realm: realm.install()), True))
+        self.choose_client_button = self.action("Choose Wow.exe…", self.choose_client)
+        self.connect_client_button = self.action("Connect to this realm", self.connect_client)
+        row.addWidget(self.choose_client_button); row.addWidget(self.connect_client_button); row.addStretch(); inside.addLayout(row)
+        layout.addWidget(parchment)
+        row = QHBoxLayout()
+        self.play_button = self.action("PLAY", self.play); self.play_button.setObjectName("play")
+        self.play_button.setMinimumWidth(180)
+        row.addWidget(self.play_button)
+        self.play_notice = label("Open or create a realm to begin.", "muted"); row.addWidget(self.play_notice, 1)
+        layout.addLayout(row)
+        row = QHBoxLayout()
+        row.addWidget(button("Characters && accounts", lambda: self.navigate(1)))
+        row.addWidget(button("Companion guide", self.companion_guide))
+        row.addWidget(button("Realm backups", lambda: self.navigate(3))); row.addStretch(); layout.addLayout(row)
+        tools_toggle = button("Realm tools ▸", lambda: None); tools_toggle.setCheckable(True)
+        layout.addWidget(tools_toggle, alignment=Qt.AlignmentFlag.AlignLeft)
+        tools = QWidget(); tool_layout = QVBoxLayout(tools); tool_layout.setContentsMargins(0, 0, 0, 0)
+        row = QHBoxLayout()
+        row.addWidget(self.action("Install / Resume", lambda: self.realm_job("Installing realm", lambda realm: realm.install())))
         row.addWidget(self.action("Start realm", lambda: self.realm_job("Starting realm", lambda realm: realm.start())))
         row.addWidget(self.action("Stop realm", lambda: self.realm_job("Stopping realm", lambda realm: realm.stop())))
-        row.addWidget(self.action("Refresh status", self.refresh_status))
-        row.addStretch(); layout.addLayout(row)
+        row.addWidget(self.action("Refresh status", self.refresh_status)); row.addStretch(); tool_layout.addLayout(row)
         row = QHBoxLayout()
         row.addWidget(self.action("Realm settings…", self.realm_settings))
-        row.addWidget(self.action("Show server logs", lambda: self.realm_job("Reading server logs", lambda realm: realm.compose("logs", "--tail", "120", "auth", "world"))))
-        row.addStretch(); layout.addLayout(row)
-        layout.addWidget(label("CONNECT FROM THIS COMPUTER", "eyebrow"))
-        layout.addWidget(label("Use an original 3.3.5a / build 12340 client and a realm account created here. Set its realmlist to 127.0.0.1. WoWee installation and client-file patching are later steps.", "muted"))
-        layout.addWidget(button("Docker Desktop setup guide", lambda: QDesktopServices.openUrl(QUrl("https://docs.docker.com/desktop/setup/install/windows-install/"))))
+        row.addWidget(self.action("Check Docker", self.prerequisites))
+        row.addWidget(self.action("Server logs", lambda: self.realm_job("Reading server logs", lambda realm: realm.compose("logs", "--tail", "120", "auth", "world"))))
+        row.addStretch(); tool_layout.addLayout(row)
+        tools.hide(); layout.addWidget(tools)
+        tools_toggle.toggled.connect(tools.setVisible)
+        tools_toggle.toggled.connect(lambda checked: tools_toggle.setText("Realm tools ▾" if checked else "Realm tools ▸"))
+        self.realm_tools_toggle = tools_toggle
         layout.addStretch()
-        self.pages.addWidget(widget)
+        scroll = QScrollArea(); scroll.setWidgetResizable(True); scroll.setWidget(content)
+        scroll.setHorizontalScrollBarPolicy(Qt.ScrollBarPolicy.ScrollBarAlwaysOff)
+        self.pages.addWidget(scroll)
+        self.update_play_state()
+
+    def client_key(self):
+        return "game_clients/" + hashlib.sha256(str(self.realm_path).encode("utf-8")).hexdigest()
+
+    def load_client_choice(self):
+        self.client = None
+        if not self.realm_path:
+            return
+        key = self.client_key()
+        choice = self.preferences.value(key, "") if self.preferences else self.client_choices.get(key, "")
+        if choice:
+            try:
+                value = json.loads(choice)
+                self.client = inspect_client(value["executable"], value["locale"])
+            except (ValueError, KeyError, OSError, TypeError) as error:
+                self.client_notice.setText("Choose the game again: " + str(error))
+                self.client_title.setText("Installation needs attention")
+
+    def choose_client(self):
+        if not self.realm_path:
+            QMessageBox.information(self, "Choose a realm", "Open or create a realm first. The game selection is saved for that realm.")
+            return
+        filename, _ = QFileDialog.getOpenFileName(self, "Choose the original Wow.exe", "", "World of Warcraft (Wow.exe wow.exe)")
+        if not filename:
+            return
+        try:
+            available = [name for name in LOCALES if (Path(filename).parent / "Data" / name).is_dir()]
+            locale = available[0] if len(available) == 1 else None
+            if len(available) > 1:
+                locale, accepted = QInputDialog.getItem(self, "Game language", "Select the language you use in this installation", available, 0, False)
+                if not accepted:
+                    return
+            client = inspect_client(filename, locale)
+            self.client = client
+            choice = json.dumps({"executable": str(client.executable), "locale": client.locale})
+            if self.preferences:
+                self.preferences.setValue(self.client_key(), choice)
+            else:
+                self.client_choices[self.client_key()] = choice
+        except (ClientError, OSError) as error:
+            QMessageBox.warning(self, "Check the game installation", str(error))
+        self.update_play_state()
+
+    def connect_client(self):
+        if not self.client:
+            return
+        try:
+            self.client = inspect_client(self.client.executable, self.client.locale)
+            if not realm_address_matches(self.client):
+                message = ("Connect this game installation to 127.0.0.1?\n\n" + str(self.client.realmlist) +
+                           "\n\nThe existing file will be saved beside it with a dated .bak name before the connection is changed. Other realms using this game installation share this setting.")
+                if QMessageBox.question(self, "Connect your game", message) != QMessageBox.StandardButton.Yes:
+                    return
+                backup = prepare_realmlist(self.client)
+                self.activity.appendPlainText("Local connection prepared." + (" Previous file: " + str(backup) if backup else ""))
+        except (ClientError, OSError) as error:
+            QMessageBox.warning(self, "Could not connect the game", str(error))
+        self.update_play_state()
+
+    def update_play_state(self):
+        if not hasattr(self, "play_button"):
+            return
+        busy = self.worker is not None
+        phase, realm_error = None, None
+        if self.realm_path:
+            try:
+                phase = ManagedRealm(self.realm_path).config["phase"]
+            except (ValueError, KeyError, OSError, RealmError) as error:
+                realm_error = str(error)
+        running = self.game_process is not None and self.game_process.poll() is None
+        self.choose_client_button.setEnabled(not busy and not running and self.realm_path is not None)
+        connected = self.client is not None and realm_address_matches(self.client)
+        self.connect_client_button.setEnabled(not busy and not running and self.client is not None and not connected)
+        self.connect_client_button.setText("Connected locally" if connected else "Connect to this realm")
+        self.play_button.setEnabled(False)
+        if self.client:
+            self.client_title.setText("Wrath of the Lich King · 3.3.5a")
+            location = str(self.client.executable.parent)
+            self.client_notice.setText("Build 12340 · " + self.client.locale + "\n" + (location if len(location) < 90 else "…" + location[-87:]))
+            self.client_notice.setToolTip(location)
+        if busy:
+            self.play_notice.setText(self.operation_title + " · See Activity for progress.")
+        elif running:
+            self.play_notice.setText("WoW is running. Return to the game to continue your adventure.")
+        elif not self.realm_path:
+            self.play_notice.setText("Open or create a realm to begin.")
+        elif realm_error:
+            self.play_notice.setText("Reopen the realm: " + realm_error)
+        elif phase != "installed":
+            self.play_notice.setText("Finish the realm installation in Realm tools → Install / Resume.")
+        elif not self.client:
+            self.play_notice.setText("Choose your matching Wow.exe to unlock Play." if os.name == "nt" else "Game launching is available on Windows. Realm tools remain available here.")
+        elif not realm_address_matches(self.client):
+            self.play_notice.setText("Connect this game installation to the local realm to unlock Play.")
+        else:
+            self.play_button.setEnabled(True)
+            self.play_notice.setText("Start the realm if needed, then open WoW. Sign in with your realm account.")
+        self.play_button.setText("GAME RUNNING" if running else "PLAY")
+        self.play_button.setToolTip(self.play_notice.text())
+
+    def play(self):
+        if not self.client or not self.realm_path or self.worker:
+            return
+        if self.game_process is not None and self.game_process.poll() is None:
+            return
+        path, client = self.realm_path, self.client
+        def launch(verified):
+            self.game_process = launch_client(verified)
+            self.game_realm_path = path
+            self.card_values[2].setText("Ready at " + datetime.now().strftime("%H:%M"))
+            self.activity.appendPlainText("WoW launched. Sign in with your realm account. Closing Hearthkeeper leaves the realm running.")
+            from PySide6.QtCore import QTimer
+            if not hasattr(self, "game_timer"):
+                self.game_timer = QTimer(self); self.game_timer.setInterval(1500)
+                self.game_timer.timeout.connect(self.game_tick)
+            self.game_timer.start()
+            self.update_play_state()
+        self.run_job("Preparing your adventure", lambda runner: start_for_play(ManagedRealm(path, runner), client.executable, client.locale), launch, cancel_callback_on_stop=True)
+
+    def game_tick(self):
+        if self.game_process is not None and self.game_process.poll() is not None:
+            exit_code = self.game_process.returncode
+            self.activity.appendPlainText("WoW closed." if exit_code == 0 else "WoW exited with code " + str(exit_code) + ". Check the game installation if it closed unexpectedly.")
+            self.game_process = None
+            self.game_timer.stop()
+            self.update_play_state()
+
+    def companion_guide(self):
+        dialog = QDialog(self); dialog.setWindowTitle("Your adventuring company"); dialog.resize(610, 420)
+        layout = QVBoxLayout(dialog)
+        layout.addWidget(label("Bring a companion", "title"))
+        layout.addWidget(label("Playerbots is included in the managed Wrath realm. Zero random bots still allows your own alternate characters to join you."))
+        layout.addWidget(text_view("1. Create another Alliance character on your account.\n2. Return to your main character.\n3. Replace CompanionName below with the character's name:\n\n.playerbots bot add CompanionName\n/invite CompanionName\n\n/p follow    — follow you\n/p stay      — hold position\n/p attack    — attack your target\n/p help      — available commands"))
+        layout.addWidget(label("MultiBot adds in-game controls. Browsing and installing addons from Hearthkeeper is planned.", "muted"))
+        row = QDialogButtonBox(QDialogButtonBox.StandardButton.Close); row.rejected.connect(dialog.reject); layout.addWidget(row)
+        dialog.exec()
 
     def build_characters_page(self):
         widget, layout = page("The people of your realm", "Create local game accounts and preserve a character after logging it out.")
@@ -573,23 +752,31 @@ class MainWindow(QMainWindow):
         self.card_values[0].setText(realm.config["name"])
         self.card_values[1].setText("Installed" if realm.config["phase"] == "installed" else realm.config["phase"].replace("-", " ").capitalize())
         self.card_values[2].setText("Not checked")
-        self.realm_notice.setText(str(realm.path) + "\nLocal-only realm · original 3.3.5a · in-game verification required")
+        self.realm_notice.setText("THIS COMPUTER · Local realm · Wrath 3.3.5a / 12340")
+        self.realm_notice.setToolTip(str(realm.path))
+        self.client_title.setText("Bring your adventurer home")
+        self.client_notice.setText("Choose your original Wrath client: Wow.exe, version 3.3.5a / build 12340.")
+        self.load_client_choice()
+        self.update_play_state()
         backups = sorted((realm.path / "backups").glob("*/manifest.json"), reverse=True)
         self.backup_list.setPlainText("\n".join(str(path.parent) for path in backups) or "No completed backups yet.")
 
-    def run_job(self, title, function, callback=None):
+    def run_job(self, title, function, callback=None, *, cancel_callback_on_stop=False):
         if self.worker:
             QMessageBox.information(self, "Operation in progress", "Let the current operation finish first.")
             return
+        self.operation_title = title
         self.activity.appendPlainText("\n" + title)
         self.worker = Worker(function)
         worker = self.worker
+        worker.cancel_callback_on_stop = cancel_callback_on_stop
         worker.line.connect(self.activity.appendPlainText)
         worker.finished.connect(lambda: self.job_finished(worker, callback))
         for action in self.actions:
             action.setEnabled(False)
         self.progress.setRange(0, 0)
         self.stop_step.setEnabled(True)
+        self.update_play_state()
         worker.start()
 
     def job_finished(self, worker, callback):
@@ -608,12 +795,16 @@ class MainWindow(QMainWindow):
                 self.activity.appendPlainText("NEEDS ATTENTION · " + worker.error)
                 self.card_values[2].setText("Check activity")
                 QMessageBox.warning(self, "Operation needs attention", worker.error)
+            elif worker.cancel_callback_on_stop and worker.runner.stop_after_step.is_set():
+                self.activity.appendPlainText("Game launch cancelled. The realm may still be running.")
             elif callback:
                 callback(worker.result)
             elif worker.result is not None:
                 self.activity.appendPlainText(str(worker.result))
         except Exception as error:
             self.activity.appendPlainText(str(error))
+            QMessageBox.warning(self, "Operation needs attention", str(error))
+        self.update_play_state()
         worker.deleteLater()
 
     def request_stop(self):
@@ -662,7 +853,8 @@ class MainWindow(QMainWindow):
 
     def refresh_status(self):
         def display(rows):
-            self.card_values[2].setText(" · ".join(row.get("Service", "?") + ": " + row.get("Health", "") + " " + row.get("State", "?") for row in rows) or "No services created")
+            self.card_values[2].setText("Ready at " + datetime.now().strftime("%H:%M") if services_ready(rows) else "Not ready at " + datetime.now().strftime("%H:%M"))
+            self.activity.appendPlainText("\n".join(row.get("Service", "?") + ": " + row.get("State", "?") + " " + row.get("Health", "") for row in rows) or "No services created")
         self.realm_job("Reading service status", lambda realm: realm.status(), display)
 
     def new_account(self):
@@ -771,7 +963,7 @@ def main():
     application = QApplication(sys.argv)
     application.setApplicationName("Hearthkeeper")
     application.setOrganizationName("Hearthkeeper")
-    application.setStyleSheet((ASSETS / "desktop.qss").read_text())
+    application.setStyleSheet((ASSETS / "desktop.qss").read_text().replace("__ASSETS__", ASSETS.as_posix()))
     if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
         from .desktop_smoke import run
         run(application, sys.argv[2])
