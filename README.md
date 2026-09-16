@@ -1,6 +1,6 @@
 # Hearthkeeper
 
-**0.1.0a3 — First Campfire · native desktop development preview**
+**0.1.0a5 — Through the Gates · native desktop development preview**
 
 A desktop home for your personal Azeroth: install and manage a progression realm,
 preserve character records, and eventually build your own towns, instances, and regions.
@@ -9,17 +9,17 @@ The main application uses native Qt windows. It does not run in a browser.
 ## Open the desktop app
 
 **Packaged Windows app (no Python):** run **Download-Windows-Preview.bat**, or open
-[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fsource-catalog).
+[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fwarcraft-home).
 Sign into GitHub **in your browser**; GitHub Desktop's sign-in is separate.
-Open a successful run for `feature/source-catalog`, scroll to **Artifacts**,
-and select **Hearthkeeper-0.1.0a3-Windows**. Extract the entire ZIP, then open
+Open a successful run for `feature/warcraft-home`, scroll to **Artifacts**,
+and select **Hearthkeeper-0.1.0a5-Windows**. Extract the entire ZIP, then open
 **Hearthkeeper.exe**. Keep the accompanying `_internal` folder beside it.
 No Python installation is needed. Click **Desktop shortcut** once to create an icon.
 This development build is unsigned; a signed distribution is a later packaging step.
 Artifacts expire after 30 days. A direct artifact link can show a 404 when you are
 signed out, lack access, or the artifact has expired; use the build list above.
 
-**GitHub Desktop / source:** fetch and select `feature/source-catalog`,
+**GitHub Desktop / source:** fetch and select `feature/warcraft-home`,
 then run **Start-Hearthkeeper.bat**. This route needs Python **3.11–3.13**
 (3.12 recommended). The launcher searches for an installed supported version even
 when Windows defaults to Python 3.14 or another unsupported version. If none is
@@ -35,6 +35,27 @@ anything or opening the app, run `Start-Hearthkeeper.bat --check-python` in a te
 
 You can explore **Archives → Meet Brindle · demo** without Docker, game files,
 or an account. This is the same fictional archive, now displayed in native widgets.
+
+## Play from your new home screen
+
+Open your existing realm on **Home**, then choose **Wow.exe** from your original
+Windows Wrath installation. Hearthkeeper reads the executable's Windows version
+metadata and checks for the expected game-data files and selected language folder.
+It requires **3.3.5a / build 12340**. The selection is remembered per realm.
+
+If needed, click **Connect to this realm**. The confirmation identifies the
+realmlist file; Hearthkeeper saves its original bytes in a dated `.bak` beside
+it before writing the local address. Then click **Play**: Hearthkeeper validates
+again, starts the realm if needed, waits for healthy services, and launches WoW.
+Sign in using your existing realm account. No account password is saved by Play.
+
+**Realm tools** expands the existing install/resume, start/stop, status, settings,
+and log controls. The **Companion guide** explains how to bring an alternate
+character along. Sources, characters, archives, and backups use the new dark
+metal/parchment theme. See [the home screen guide](docs/HOME.md).
+
+Game launching is Windows-only in this preview. Linux retains its existing
+realm and archive tools. Luna migration is the next milestone.
 
 ## Explore sources and preserve downloads
 
@@ -58,11 +79,11 @@ See [the source catalog guide](docs/SOURCE_CATALOG.md).
 1. Install and start **Docker Desktop** with Linux containers on Windows.
    Its system prerequisites, including WSL/virtualization and any restart, require
    the normal Docker installer. Hearthkeeper does not silently change them.
-2. Open **Realm → New realm**. Choose a new realm folder and either an original
+2. Open **Home → New realm**. Choose a new realm folder and either an original
    **3.3.5a / build 12340** client folder or matching extracted AzerothCore server data.
 3. Choose XP rates, random-bot population, and build workers. Click **Install realm**.
 4. After installation, create a private-realm account under **Characters**, then
-   click **Start realm**. Use the matching client with realmlist `127.0.0.1`.
+   choose the client on Home, connect it to the realm, and click **Play**.
 
 Hearthkeeper builds the pinned Playerbot core with Playerbots and Individual
 Progression, creates dedicated databases and credentials, imports core/module SQL,
@@ -78,7 +99,7 @@ database volume use the selected local Docker context. See [setup details](docs/
 
 | Area | Available in this preview |
 | --- | --- |
-| Realm | Install/resume, start, stop, status, logs, XP and random-bot settings |
+| Home | Windows client selection, version checks, backed-up connection setup, Play, and expandable realm tools |
 | Characters | Create ordinary or GM accounts, list characters, capture a logged-out character |
 | Archives | Native viewer, search, checksum validation, module records, coverage, snapshot comparison |
 | Backups | Stop gameplay and save SQL databases, configuration, credentials, and source pins |
@@ -90,7 +111,7 @@ The command-line archive tools and optional offline HTML export remain available
 
 ## Validation and remaining gates
 
-The project has 36 unit tests covering archive behavior, realm boundaries, source preservation, and failure handling.
+The project has 48 unit tests covering archive behavior, realm boundaries, source preservation, and failure handling.
 The native acceptance check exercises actual Qt widgets, including archive search,
 module/coverage views, literal archived text, and background work. Windows CI builds
 and tests the packaged executable.
@@ -99,9 +120,12 @@ A separate CI gate compiles the actual pinned core and modules, imports their SQ
 creates a game account, and attempts a build-12340 SRP authentication exchange
 with the real authserver. See the PR for the results at its exact commit.
 
-**No matching game files are available in the development environment.** Extraction,
-world startup, in-game login/play, and restoration still require live acceptance
-testing. Authserver authentication alone does not establish a playable world.
+The user has reported a successful first login and brief play in the preceding
+local build. **No matching game files are available in the development environment.**
+The new Play flow is tested with fictional files and mocked services/processes;
+launching the actual WoW executable and broader gameplay still require user
+acceptance. Windows CI also checks the version reader against a real executable.
+Restoration remains a separate gate.
 WoWee compilation/installation and optional client patches are not automated yet.
 Runtime Ubuntu/MySQL tags and apt dependencies are not fully locked by digest.
 

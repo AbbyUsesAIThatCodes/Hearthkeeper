@@ -80,8 +80,9 @@ The auth database stores SRP salt/verifier records.
 
 For a conventional original 3.3.5a client, edit its language-specific
 `Data/<locale>/realmlist.wtf` to contain `set realmlist 127.0.0.1`, preserving
-a copy of its previous contents. Launch the game's executable directly. The app
-does not rewrite client files or install WoWee in this preview.
+a copy of its previous contents. Launch the game's executable directly. On Windows, Home can select and validate Wow.exe, save a dated backup of the
+realmlist, connect it to the local realm after confirmation, and launch it through
+Play. Manual setup remains available. The app does not install WoWee in this preview.
 
 Only `127.0.0.1:3724` and `127.0.0.1:8085` are published. The database and
 administration endpoints are not published. A desktop manager inside a dedicated
