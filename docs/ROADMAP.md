@@ -4,6 +4,52 @@ The aim is a personal Azeroth that stays enjoyable and can be preserved. Release
 pair semantic versions with codenames. We work through PRs, local user testing,
 feedback, and user merges.
 
+## Agreed next milestones
+
+The user has reported successfully starting the local realm, creating an account
+and a gnome, entering the world, and fighting a wolf with the 0.1.0a3 setup.
+This establishes user-reported first-login success. Companion play, broader game
+systems, backup restoration, and remote deployment still need acceptance.
+
+Keep the following five milestones in order. These are planned capabilities.
+
+| Order | Milestone | Reviewable outcome |
+| --- | --- | --- |
+| 1 | Warcraft styling and everyday usability | A working native Hearthkeeper home screen with realm/era/host identity, honest readiness indicators, game-installation selection, and Play that starts the required services and launches the matching client. Extend the reviewed design to other screens. |
+| 2 | Migrate the existing realm to Luna | Hearthkeeper and the game run on Windows; Luna hosts the realm services, database, and server data. Implement remote management, restore a complete backup, and log into the existing gnome on Luna before retiring the local server. Update setup and operating instructions. |
+| 3 | Automate acquisition and installation | Support direct downloads and qBittorrent integration, track completion, verify completed files and client builds, then prepare and launch installations. Preserve exact versions and source information. |
+| 4 | Test additional eras and realm profiles | Introduce one reproducible server/client/module combination at a time, with recorded compatibility and in-game checks. Distinguish discovered, downloaded, installed, and play-tested profiles. |
+| 5 | Begin the integrated content workshop | Start with a searchable world browser and a small editable content pack: an NPC, dialogue, vendor inventory, and a short quest. Install and test the pack before expanding to settlements, instances, and terrain. |
+
+### First visual milestone
+
+Target the classic/Wrath interface vocabulary: carved stone, dark metal,
+parchment, warm gold type, substantial red buttons, and framed ability-style
+icons. Preserve readable text, clear focus and selection states, and comfortable
+spacing. Keep the native Qt foundation and existing separation of UI and realm
+operations.
+
+The opening screen should answer: which world, which era, which host, whether
+it is ready, and how to play. Provide clear access to characters, companions,
+installations, and backups. Surface the reason and next action when Play is
+unavailable. An operation's progress must describe real work.
+
+A prior conversation mentioned an 0.1.0a4 “Hearth & Parchment” draft. Locate and
+inspect any recoverable draft before duplicating it; its implementation has not
+been verified in this branch.
+
+### Downloads and extensions
+
+Use qBittorrent's documented API as the initial torrent integration: submit a
+selected torrent or magnet, track the transfer and destination, and import
+completed payloads into the installation workflow. Distinguish transfer
+completion, file verification, and actual game compatibility. Evaluate an
+embedded torrent engine later if needed.
+
+The extension browser below is an additional agreed capability. Reserve its
+navigation and profile metadata during the first milestone; implement browsing
+and installation alongside the later installation/profile work.
+
 ## 0.1.0a1 — First Campfire archive preview
 
 - Fictional, offline character archive and viewer.
@@ -31,7 +77,7 @@ play, WoWee setup, and restoration still requires subsequent acceptance work.
 - Seven providers and 22 catalog offerings, with original/Classic client distinctions.
 - GitHub source snapshots with exact commit identity, completed-file imports, and verification.
 - Native source filters and saved-copy browsing; historical/unavailable source labeling.
-- Next: Luna transport, complete client verification/setup, and one tested remote realm profile.
+- Next: the agreed Warcraft interface/usability milestone, followed by Luna migration.
 
 See [the catalog guide](SOURCE_CATALOG.md) for coverage and acquisition limits.
 
@@ -57,6 +103,39 @@ Test one healer plus a tank and three damage bots. Tune controls and specific
 encounters from play feedback. Add population, AH Bot, and AutoBalance only after
 the small party works. Review XP and profession friction; don't automatically
 restore chores that the player wanted to escape.
+
+## Extension browser — planned
+
+Add an integrated browser in Hearthkeeper for discovering, comparing, selecting,
+installing, and trying extensions. Explain the two categories in the interface:
+
+| Type | Runs where | Example and installation implications |
+| --- | --- | --- |
+| Server module | Inside the realm server | Playerbots and gameplay modules. Compatibility depends on the server core and revision; installation can require compilation, database updates, and a realm restart. |
+| In-game addon | Inside the selected WoW client | Companion controls such as MultiBot and other interface tools. Compatibility depends on the client build and addon API; files belong to that installation's addon folder and activation may require a UI reload or relog. |
+
+For each entry, show its purpose, screenshots when available, upstream source,
+version, supported core/client builds, dependencies, known conflicts, installed
+state, and the evidence behind compatibility claims. Filter by realm profile,
+era/build, category, and installed status. “Listed” must not imply “tested.”
+
+Use the existing source catalog as the foundation for extension metadata and
+saved versions. Show the target realm or game installation and the concrete
+actions required before applying a change. Account for rebuilding, restarting,
+and database migration where relevant. Track installed versions per profile and
+offer recovery appropriate to that extension; do not promise that removing a
+module's files reverses its database changes.
+
+Start with a short curated selection and test one change at a time in a
+disposable copy of the realm. An early companion-control experiment should try
+MultiBot with the current Wrath/Playerbots combination and record setup,
+reliability, and usability findings before selecting a default. The user's
+experience with a previous Vanilla control addon was clunky and unreliable;
+comfortable everyday control is an explicit acceptance criterion.
+
+References:
+- [Playerbots commands and MultiBot context](https://github.com/mod-playerbots/mod-playerbots/wiki/Playerbot-Commands)
+- [qBittorrent WebUI API](https://github.com/qbittorrent/qBittorrent/wiki/WebUI-API-%28qBittorrent-5.0%29)
 
 ## Portable character records
 
