@@ -17,6 +17,7 @@ from .demo import create_fixture
 from .model import normalized
 from .realm import doctor, plan, prepare_sources
 from .viewer import render_archive
+from .sources import SourceError, fetch_snapshot, import_file, load_catalog, offerings, verify_saved
 
 
 def parser():
@@ -55,6 +56,18 @@ def parser():
     sources = commands.add_parser("prepare-sources", help="Explicit network action: fetch pinned source checkouts")
     sources.add_argument("--directory", type=Path, default=Path("var/sources"))
     sources.add_argument("--include-client", action="store_true")
+    catalog = commands.add_parser("source-catalog", help="List bundled source offerings without network access")
+    catalog.add_argument("--provider", default="")
+    catalog.add_argument("--era", default="")
+    catalog.add_argument("--search", default="")
+    for name in ("source-fetch", "source-import"):
+        child = commands.add_parser(name, help="Preserve source code or one explicitly selected downloaded file")
+        child.add_argument("offering", help="Offering ID from source-catalog")
+        child.add_argument("--directory", type=Path, required=True)
+        if name == "source-import":
+            child.add_argument("file", type=Path)
+    verify = commands.add_parser("source-verify", help="Check saved source-copy bytes against their manifest")
+    verify.add_argument("directory", type=Path)
     return command
 
 
@@ -105,7 +118,24 @@ def main(arguments=None):
         elif args.command == "prepare-sources":
             print(prepare_sources(args.directory, args.include_client))
             print("Sources prepared; no build, dependencies, game data, services, or submodules installed.")
+        elif args.command == "source-catalog":
+            print(json.dumps(offerings(load_catalog(), provider=args.provider, era=args.era, query=args.search), indent=2))
+        elif args.command in ("source-fetch", "source-import"):
+            entry = next((entry for entry in load_catalog()["offerings"] if entry["id"] == args.offering), None)
+            if entry is None:
+                raise SourceError("Unknown offering. Run source-catalog to see available IDs.")
+            if args.command == "source-fetch":
+                result = fetch_snapshot(entry, args.directory, log=print)
+            else:
+                result = import_file(entry, args.file, args.directory, log=print)
+            print(result)
+            print("Saved copy only. No client, database, or realm has been installed or changed.")
+        elif args.command == "source-verify":
+            print(verify_saved(args.directory))
         return 0
+    except SourceError as error:
+        print(f"Hearthkeeper sources: {error}", file=sys.stderr)
+        return 1
     except (ArchiveError, OSError, sqlite3.Error, KeyError, TypeError, ValueError, RecursionError) as error:
         print(f"Hearthkeeper: {error if isinstance(error, (ArchiveError, OSError)) else 'Invalid database or archive structure'}", file=sys.stderr)
         return 1

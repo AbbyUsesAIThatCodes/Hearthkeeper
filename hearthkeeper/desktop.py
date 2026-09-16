@@ -11,7 +11,7 @@ from PySide6.QtWidgets import (QAbstractItemView, QApplication, QCheckBox, QComb
     QDialog, QDialogButtonBox, QFileDialog, QFormLayout, QFrame, QHBoxLayout,
     QHeaderView, QLabel, QLineEdit, QMainWindow, QMessageBox, QPlainTextEdit,
     QProgressBar, QPushButton, QScrollArea, QSpinBox, QSplitter, QStackedWidget,
-    QTableWidget, QTableWidgetItem, QTabWidget, QVBoxLayout, QWidget)
+    QTableWidget, QTableWidgetItem, QTabWidget, QTreeWidget, QTreeWidgetItem, QVBoxLayout, QWidget)
 
 from . import CODENAME, __version__
 from .archive import compare_archives, read_archive, write_archive
@@ -19,6 +19,8 @@ from .database import capture, sqlite_reader
 from .demo import create_fixture
 from .model import normalized, records, RACES, CLASSES
 from .server.manager import ManagedRealm, RealmError, Runner, create_realm, local_docker
+from .sources import (load_catalog, offerings, client_target, fetch_snapshot,
+                      import_file, list_saved, verify_saved)
 
 ASSETS = Path(__file__).parent / "assets"
 
@@ -261,7 +263,7 @@ class MainWindow(QMainWindow):
         sidebar.setFixedWidth(max(212, brand.fontMetrics().horizontalAdvance(brand.text()) + 44))
         navigation.addWidget(label("YOUR OWN AZEROTH", "brandSub")); navigation.addSpacing(28)
         self.nav_buttons = []
-        for index, title in enumerate(("Realm", "Characters", "Archives", "Backups", "Workshop")):
+        for index, title in enumerate(("Realm", "Characters", "Archives", "Backups", "Sources", "Workshop")):
             item = QPushButton(title); item.setObjectName("nav"); item.setCheckable(True)
             item.clicked.connect(lambda checked=False, index=index: self.navigate(index))
             navigation.addWidget(item); self.nav_buttons.append(item)
@@ -282,7 +284,7 @@ class MainWindow(QMainWindow):
         activity_layout.addWidget(self.activity)
         right.addWidget(activity); right.setSizes([650, 190]); root_layout.addWidget(right, 1)
         self.setCentralWidget(root)
-        self.build_realm_page(); self.build_characters_page(); self.build_archives_page(); self.build_backups_page(); self.build_workshop_page()
+        self.build_realm_page(); self.build_characters_page(); self.build_archives_page(); self.build_backups_page(); self.build_sources_page(); self.build_workshop_page()
         self.navigate(0)
         if self.preferences:
             recent = self.preferences.value("last_realm", "")
@@ -365,6 +367,199 @@ class MainWindow(QMainWindow):
         layout.addWidget(label("PLANNED · Authoring tools are not implemented in this preview. Content packs will record identity, version, dependencies, and compatibility so future archives can understand your custom world.", "status"))
         layout.addStretch(); self.pages.addWidget(widget)
 
+    def build_sources_page(self):
+        widget, layout = page("A library of Azeroths", "Browse providers, preserve source revisions, and keep downloaded clients and databases together.")
+        layout.setSpacing(9)
+        self.source_catalog = load_catalog()
+        self.source_entries = {entry["id"]: entry for entry in self.source_catalog["offerings"]}
+        default_root = str(Path(QStandardPaths.writableLocation(QStandardPaths.StandardLocation.AppLocalDataLocation)) / "SourceArchive")
+        self.source_root = Path(self.preferences.value("source_archive", default_root) if self.preferences else default_root)
+        row = QHBoxLayout()
+        self.source_location = label(str(self.source_root), "muted")
+        row.addWidget(self.source_location, 1)
+        row.addWidget(self.action("Archive location…", self.choose_source_location))
+        layout.addLayout(row)
+        self.source_tabs = QTabWidget()
+        catalog_page = QWidget(); inside = QVBoxLayout(catalog_page)
+        filters = QHBoxLayout()
+        self.source_provider = QComboBox(); self.source_provider.addItem("All sources", "")
+        for provider in self.source_catalog["providers"]:
+            self.source_provider.addItem(provider["name"], provider["id"])
+        self.source_era = QComboBox(); self.source_era.addItem("All eras", "")
+        for era in dict.fromkeys(entry["era"] for entry in self.source_catalog["offerings"]):
+            self.source_era.addItem(era, era)
+        self.source_search = QLineEdit(); self.source_search.setPlaceholderText("Find a client, core, or build…")
+        self.source_search.setClearButtonEnabled(True)
+        filters.addWidget(self.source_provider); filters.addWidget(self.source_era); filters.addWidget(self.source_search, 1)
+        inside.addLayout(filters)
+        self.source_tree = QTreeWidget()
+        self.source_tree.setHeaderLabels(["Source / offering", "Type", "Client version", "Obtain"])
+        self.source_tree.setAlternatingRowColors(True)
+        self.source_tree.setColumnWidth(0, 280); self.source_tree.setColumnWidth(1, 125); self.source_tree.setColumnWidth(2, 125)
+        self.source_tree.setMinimumHeight(130)
+        inside.addWidget(self.source_tree, 1)
+        self.source_summary = label("", "muted")
+        inside.addWidget(self.source_summary)
+        self.source_detail_text = ""
+        controls = QHBoxLayout()
+        self.source_detail_button = button("Details…", self.show_source_details)
+        self.source_open = self.action("Source page", self.open_source_page)
+        self.source_fetch = self.action("Save snapshot", self.fetch_source, True)
+        self.source_import = self.action("Import file…", self.import_source_file)
+        for action in (self.source_detail_button, self.source_open, self.source_fetch, self.source_import):
+            controls.addWidget(action)
+        controls.addStretch(); inside.addLayout(controls)
+        self.source_tabs.addTab(catalog_page, "Catalog")
+        saved_page = QWidget(); saved = QVBoxLayout(saved_page)
+        saved.addWidget(label("Saved copies preserve files and provenance. Verification checks that their bytes still match; it does not certify a client build or a playable realm.", "muted"))
+        self.source_saved = data_table(["Offering", "Saved (UTC)", "Size", "Acquisition"], [])
+        saved.addWidget(self.source_saved, 1)
+        self.source_saved_notice = label("", "muted"); saved.addWidget(self.source_saved_notice)
+        controls = QHBoxLayout()
+        controls.addWidget(self.action("Verify selected copy", self.verify_source_copy, True))
+        controls.addWidget(button("Open selected folder", self.open_source_copy))
+        controls.addWidget(button("Refresh", self.refresh_source_copies)); controls.addStretch()
+        saved.addLayout(controls); self.source_tabs.addTab(saved_page, "Saved copies")
+        layout.addWidget(self.source_tabs, 1)
+        layout.addWidget(label("Catalog preview · Realm installation still uses the pinned Wrath setup.", "muted"))
+        self.pages.addWidget(widget)
+        self.source_tree.currentItemChanged.connect(self.source_selection)
+        self.source_provider.currentIndexChanged.connect(self.filter_sources)
+        self.source_era.currentIndexChanged.connect(self.filter_sources)
+        self.source_search.textChanged.connect(self.filter_sources)
+        self.filter_sources()
+        self.refresh_source_copies()
+
+    def filter_sources(self):
+        self.source_tree.clear()
+        matches = offerings(self.source_catalog, provider=self.source_provider.currentData(),
+                            era=self.source_era.currentData(), query=self.source_search.text().strip())
+        first = None
+        for provider in self.source_catalog["providers"]:
+            entries = [entry for entry in matches if entry["provider"] == provider["id"]]
+            if not entries:
+                continue
+            group = QTreeWidgetItem([provider["name"], "", "", ""])
+            group.setToolTip(0, provider["description"])
+            self.source_tree.addTopLevelItem(group)
+            for entry in entries:
+                item = QTreeWidgetItem([entry["name"], entry["kind"], entry["client"]["version"],
+                                       "Reference" if entry.get("availability") else
+                                       "Source snapshot" if entry["acquisition"] == "github_snapshot" else "Download page"])
+                item.setData(0, Qt.ItemDataRole.UserRole, entry["id"])
+                for column in range(4):
+                    item.setToolTip(column, client_target(entry) + "\n" + entry["notes"])
+                group.addChild(item)
+                first = first or item
+            group.setExpanded(bool(self.source_provider.currentData() or self.source_search.text()
+                                   or self.source_era.currentData() or provider["id"] == "chromiecraft"))
+        if first:
+            self.source_tree.setCurrentItem(first)
+        self.source_selection()
+
+    def selected_source(self):
+        item = self.source_tree.currentItem()
+        return self.source_entries.get(item.data(0, Qt.ItemDataRole.UserRole)) if item else None
+
+    def source_selection(self, *_):
+        entry = self.selected_source()
+        active = bool(entry) and not self.worker
+        self.source_open.setEnabled(active)
+        self.source_import.setEnabled(active)
+        self.source_fetch.setEnabled(active and entry["acquisition"] == "github_snapshot")
+        self.source_detail_button.setEnabled(bool(entry))
+        if not entry:
+            self.source_summary.setText("Choose an offering beneath a source, or clear the filters.")
+            self.source_detail_text = ""
+            return
+        self.source_summary.setText(client_target(entry) + "\n" +
+            (entry.get("availability") or entry["gameplay"]) + " · See Details.")
+        self.source_detail_text = (
+            f"{entry['name']}\n{entry['era']} · {client_target(entry)}\n"
+            f"Installation: {entry['installation']} · Gameplay: {entry['gameplay']}\n"
+            f"Source page reviewed: {entry['reviewed_on']}\n\n{entry['notes']}\n\n{entry['page_url']}")
+
+    def show_source_details(self):
+        if not self.selected_source():
+            return
+        dialog = QDialog(self); dialog.setWindowTitle("Source offering details"); dialog.resize(650, 380)
+        layout = QVBoxLayout(dialog); layout.addWidget(text_view(self.source_detail_text))
+        close = QDialogButtonBox(QDialogButtonBox.StandardButton.Close)
+        close.rejected.connect(dialog.reject); layout.addWidget(close)
+        dialog.exec()
+
+    def choose_source_location(self):
+        path = QFileDialog.getExistingDirectory(self, "Choose where to preserve source copies", str(self.source_root))
+        if path:
+            self.source_root = Path(path)
+            self.source_location.setText(str(self.source_root))
+            if self.preferences:
+                self.preferences.setValue("source_archive", str(self.source_root))
+            self.refresh_source_copies()
+
+    def open_source_page(self):
+        entry = self.selected_source()
+        if entry:
+            QDesktopServices.openUrl(QUrl(entry["page_url"]))
+
+    def fetch_source(self):
+        entry = self.selected_source()
+        if not entry or entry["acquisition"] != "github_snapshot":
+            return
+        root = self.source_root
+        self.run_job("Saving " + entry["name"],
+            lambda runner: fetch_snapshot(entry, root, stop=runner.stop_after_step, log=runner.log), self.source_saved_complete)
+
+    def import_source_file(self):
+        entry = self.selected_source()
+        if not entry:
+            return
+        path, _ = QFileDialog.getOpenFileName(self, "Choose a completed download to copy into the source archive")
+        if not path:
+            return
+        root = self.source_root
+        self.run_job("Archiving downloaded file for " + entry["name"],
+            lambda runner: import_file(entry, path, root, stop=runner.stop_after_step, log=runner.log), self.source_saved_complete)
+
+    def source_saved_complete(self, destination):
+        self.activity.appendPlainText("Source copy saved: " + str(destination))
+        self.refresh_source_copies()
+        self.source_tabs.setCurrentIndex(1)
+        for row, (path, _) in enumerate(self.source_copies):
+            if path == destination:
+                self.source_saved.selectRow(row)
+                break
+
+    def refresh_source_copies(self):
+        self.source_copies, errors = list_saved(self.source_root)
+        self.source_saved.setRowCount(len(self.source_copies))
+        for row, (path, manifest) in enumerate(self.source_copies):
+            values = [manifest["offering"]["name"], manifest["saved_utc"][:19].replace("T", " "),
+                      f"{manifest['payload']['bytes'] / (1024 ** 2):,.1f} MiB",
+                      "Source snapshot" if manifest["acquisition"]["method"] == "github_snapshot" else "Imported file"]
+            for column, value in enumerate(values):
+                item = QTableWidgetItem(value); item.setToolTip(str(path))
+                self.source_saved.setItem(row, column, item)
+        self.source_saved_notice.setText(f"{len(self.source_copies)} saved copies. " +
+            (f"{len(errors)} unreadable entries; see Activity." if errors else "Choose a copy to verify its recorded checksum."))
+        if errors:
+            self.activity.appendPlainText("\n".join(errors))
+
+    def selected_source_copy(self):
+        row = self.source_saved.currentRow()
+        return self.source_copies[row][0] if 0 <= row < len(self.source_copies) else None
+
+    def verify_source_copy(self):
+        path = self.selected_source_copy()
+        if path:
+            self.run_job("Checking saved copy", lambda runner: verify_saved(path, stop=runner.stop_after_step),
+                         lambda result: QMessageBox.information(self, "Saved-copy verification", result))
+
+    def open_source_copy(self):
+        path = self.selected_source_copy()
+        if path:
+            QDesktopServices.openUrl(QUrl.fromLocalFile(str(path)))
+
     def navigate(self, index):
         self.pages.setCurrentIndex(index)
         for number, item in enumerate(self.nav_buttons):
@@ -403,6 +598,7 @@ class MainWindow(QMainWindow):
         self.stop_step.setEnabled(False)
         for action in self.actions:
             action.setEnabled(True)
+        self.source_selection()
         try:
             path = self.pending_path or self.realm_path
             if path and (Path(path) / "realm.json").is_file():

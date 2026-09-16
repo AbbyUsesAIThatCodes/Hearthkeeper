@@ -1,5 +1,20 @@
 # Changelog
 
+## 0.1.0a3 — First Campfire source catalog preview — 2026-09-13
+
+- Added a native Sources page with seven providers and 22 client, server, module,
+  patch, database, and historical-reference offerings, plus provider/era/search filters.
+- Added source snapshots resolved to exact GitHub commits, explicit downloaded-file
+  imports, saved-copy browsing, and SHA-256 preservation checks.
+- Recorded acquisition provenance and incomplete-copy state without executing,
+  extracting, or installing the saved content.
+- Kept original clients separate from Classic rereleases and moving modern targets.
+- Marked Ashamane's advertised BFA branch as unavailable after checking live refs.
+- Added nine preservation/failure tests and offline native catalog acceptance checks.
+
+Remote Luna installation, client build inspection/configuration/launch, automatic
+client downloads, alternate-core installers, and archive restoration remain future work.
+
 ## 0.1.0a2 — First Campfire desktop preview — 2026-09-12
 
 - Began the new preview version before adding the native desktop feature set.

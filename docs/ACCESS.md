@@ -9,6 +9,11 @@ outside the scope of Hearthkeeper. There is no need to describe, upload, move, o
 expose those files to work on this project. No zero-risk claim is made about
 unrestricted system access or third-party server/client software.
 
+The Sources page added in 0.1.0a3 reads its bundled catalog and the selected source
+archive folder. Explicit snapshot actions contact GitHub, and file import copies
+one user-selected completed download. Neither operation executes or extracts its
+payload, modifies a realm, or reaches Luna. See [source catalog](SOURCE_CATALOG.md).
+
 ## If local agent access becomes useful
 
 Use a dedicated development VM with a clean account. Copy only Hearthkeeper and
