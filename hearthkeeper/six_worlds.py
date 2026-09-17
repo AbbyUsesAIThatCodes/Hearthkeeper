@@ -188,7 +188,9 @@ def main():
     application = QApplication(sys.argv)
     application.setApplicationName("Hearthkeeper")
     application.setOrganizationName("Hearthkeeper")
-    application.setStyleSheet((ASSETS / "desktop.qss").read_text().replace("__ASSETS__", ASSETS.as_posix()))
+    from .ui_test_fonts import prepare_offscreen_fonts
+    prepare_offscreen_fonts(application)
+    application.setStyleSheet((ASSETS / "desktop.qss").read_text(encoding="utf-8").replace("__ASSETS__", ASSETS.as_posix()))
     if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
         # Run the full existing acceptance suite against this themed subclass.
         from unittest.mock import patch
@@ -205,4 +207,12 @@ def main():
 
 
 if __name__ == "__main__":
-    raise SystemExit(main())
+    try:
+        raise SystemExit(main())
+    except Exception:
+        import traceback
+        if len(sys.argv) == 3 and sys.argv[1] == "--smoke-test":
+            destination = Path(sys.argv[2]); destination.mkdir(parents=True, exist_ok=True)
+            (destination / "smoke-error.txt").write_text(traceback.format_exc(), encoding="utf-8")
+        traceback.print_exc()
+        raise SystemExit(1)

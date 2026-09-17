@@ -1,6 +1,6 @@
 """Home materials and composition only; the existing realm commands are reused."""
 from pathlib import Path
-from PySide6.QtCore import QRectF, QSize, Qt
+from PySide6.QtCore import QRectF, QSize, Qt, QTimer
 from PySide6.QtGui import QColor, QPainter, QPixmap
 from PySide6.QtWidgets import (QBoxLayout, QFrame, QLabel, QLayout, QPushButton,
                               QSizePolicy, QVBoxLayout, QWidget)
@@ -38,14 +38,26 @@ def prepare_header(header):
     layout.addStretch(1)
     layout.addWidget(header.caption)
     header.scene_target = QRectF()
+    # Never synchronously resize this widget from inside its own resize event.
+    header.geometry_timer = QTimer(header)
+    header.geometry_timer.setSingleShot(True)
+    header.geometry_timer.timeout.connect(lambda: fit_header_height(header))
 
 
 def resize_header(header):
-    """Width-only sizing converges; no font/height feedback inside resize events."""
+    """Defer height changes until the parent has completed its width layout."""
     width = max(230, header.width() - 48)
     for text in (header.kicker, header.heading, header.caption):
         text.setMaximumWidth(width)
-    height = max(290, round((header.width() - 28) * 258 / 877) + 116)
+    header.geometry_timer.start(0)
+
+
+def fit_header_height(header):
+    width = max(230, header.width() - 48)
+    text_height = sum(max(12, item.heightForWidth(width))
+                      for item in (header.kicker, header.heading, header.caption))
+    height = round((header.width() - 28) * 258 / 877) + text_height + 66
+    height = max(300, height)
     if header.height() != height:
         header.setFixedHeight(height)
 
@@ -151,7 +163,10 @@ def prepare_layout(window):
     cards = content.findChildren(QFrame, "card")
     for index, card in enumerate(cards):
         card.setMinimumHeight(136)
-        card.layout().setContentsMargins(83, 25, 20, 22)
+        card.layout().setContentsMargins(78, 25, 16, 22)
+        for text in card.findChildren(QLabel):
+            text.setMinimumWidth(0)
+            text.setSizePolicy(QSizePolicy.Policy.Ignored, QSizePolicy.Policy.Preferred)
         skin(card, "stone", "client_medallion" if index == 1 else "realm_medallion")
     parchment.layout().setContentsMargins(24, 23, 24, 23)
     skin(parchment, "parchment")

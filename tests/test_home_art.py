@@ -76,7 +76,7 @@ class HomeArtTests(unittest.TestCase):
         self.assertEqual(__version__, "0.1.0a8")
         self.assertEqual(project["project"]["version"], __version__)
         self.assertEqual(CODENAME, "At the War Table")
-        self.assertIn("assets/*", project["tool.setuptools"]["package-data"]["hearthkeeper"])
+        self.assertIn("assets/*", project["tool"]["setuptools"]["package-data"]["hearthkeeper"])
 
 
 if __name__ == "__main__":

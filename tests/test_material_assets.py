@@ -16,7 +16,7 @@ ASSETS = Path(__file__).resolve().parents[1] / 'hearthkeeper' / 'assets'
 
 class MaterialAssetTests(unittest.TestCase):
     def test_exact_packaged_atlas(self):
-        manifest = json.loads((ASSETS / 'war-table.json').read_text())
+        manifest = json.loads((ASSETS / 'war-table.json').read_text(encoding="utf-8"))
         data = read_material_atlas()
         self.assertEqual(hashlib.sha256(data).hexdigest(), manifest['sha256'])
         self.assertEqual(struct.unpack('<I', data[4:8])[0] + 8, len(data))
@@ -68,22 +68,22 @@ class MaterialAssetTests(unittest.TestCase):
                 (root/name).write_text(text[index*16000:(index+1)*16000], encoding='ascii')
             with self.assertRaisesRegex(ValueError, 'checksum'):
                 read_material_atlas(root)
-            manifest = json.loads((root/'war-table.json').read_text())
+            manifest = json.loads((root/'war-table.json').read_text(encoding="utf-8"))
             manifest['parts'] = ['../../outside']
             (root/'war-table.json').write_text(json.dumps(manifest))
             with self.assertRaises(ValueError):
                 read_material_atlas(root)
 
     def test_provenance_and_native_captions(self):
-        manifest = json.loads((ASSETS/'war-table.json').read_text())
+        manifest = json.loads((ASSETS/'war-table.json').read_text(encoding="utf-8"))
         self.assertEqual(manifest['regions']['panorama']['source_crop'], [640,43,1517,301])
         self.assertIn('not a running application', manifest['notice'])
         self.assertEqual(len(manifest['source_sha256']), 64)
-        code = (ASSETS.parent/'home_art.py').read_text()
+        code = (ASSETS.parent/'home_art.py').read_text(encoding="utf-8")
         self.assertIn('The Burning Crusade  ·  Some gates should never close.', code)
         self.assertNotIn('QLinearGradient', code)
         for filename in ('material_assets.py', 'material_widgets.py', 'home_art.py'):
-            tree = ast.parse((ASSETS.parent/filename).read_text())
+            tree = ast.parse((ASSETS.parent/filename).read_text(encoding="utf-8"))
             modules = [n.module or '' for n in ast.walk(tree) if isinstance(n, ast.ImportFrom)]
             modules += [a.name for n in ast.walk(tree) if isinstance(n, ast.Import) for a in n.names]
             self.assertFalse(any(m.startswith(('subprocess', 'socket', 'urllib', 'requests')) for m in modules))
