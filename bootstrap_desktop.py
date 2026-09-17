@@ -15,21 +15,20 @@ def main():
     if sys.argv[1:] == ["--check-python"]:
         print(json.dumps({"version": list(sys.version_info[:3]), "executable": sys.executable}))
         return
-    import tomllib
     environment = ROOT / ".venv"
     python = environment / ("Scripts/python.exe" if os.name == "nt" else "bin/python")
     if not python.is_file():
         print("Creating Hearthkeeper's project-local Python environment…", flush=True)
         subprocess.run([sys.executable, "-m", "venv", str(environment)], check=True)
-    dependencies = tomllib.loads((ROOT / "pyproject.toml").read_text())["project"]["optional-dependencies"]["desktop"]
-    fingerprint = hashlib.sha256(json.dumps(dependencies).encode()).hexdigest()
+    # Entry points and metadata matter too, not just the dependency list.
+    fingerprint = hashlib.sha256((ROOT / "pyproject.toml").read_bytes()).hexdigest()
     marker = environment / "hearthkeeper-desktop-dependencies.txt"
     if not marker.exists() or marker.read_text() != fingerprint:
         print("Installing the desktop toolkit into .venv. The first download is substantial…", flush=True)
         subprocess.run([str(python), "-m", "pip", "install", "-e", ".[desktop]"], cwd=ROOT, check=True)
         marker.write_text(fingerprint)
     executable = python.with_name("pythonw.exe") if os.name == "nt" else python
-    subprocess.Popen([str(executable), "-m", "hearthkeeper.desktop"], cwd=ROOT)
+    subprocess.Popen([str(executable), "-m", "hearthkeeper.six_worlds"], cwd=ROOT)
 
 
 if __name__ == "__main__":

@@ -1,5 +1,5 @@
 """Entry point for the packaged desktop executable."""
-from hearthkeeper.desktop import main
+from hearthkeeper.six_worlds import main
 
 if __name__ == "__main__":
     import sys
