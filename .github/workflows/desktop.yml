@@ -30,6 +30,7 @@ jobs:
           }
           if (!(Test-Path var/native-packaged/result.json)) { throw 'The packaged app did not write its test result.' }
           if (!(Test-Path var/native-packaged/six-worlds-result.json)) { throw 'The packaged app did not test its six themes.' }
+          if (!(Test-Path var/native-packaged/home-art-result.json)) { throw 'The packaged app did not test its painted Home.' }
         env:
           QT_QPA_PLATFORM: offscreen
       - name: Install an unsupported default Python to reproduce the launch report
@@ -51,7 +52,7 @@ jobs:
           Write-Output "Default Python was 3.14; the source launcher correctly selected 3.12."
       - uses: actions/upload-artifact@v4
         with:
-          name: Hearthkeeper-0.1.0a6-Windows
+          name: Hearthkeeper-0.1.0a7-Windows
           path: dist/Hearthkeeper/
           retention-days: 30
       - uses: actions/upload-artifact@v4

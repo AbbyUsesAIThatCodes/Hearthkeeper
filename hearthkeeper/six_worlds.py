@@ -11,6 +11,7 @@ from PySide6.QtWidgets import (QAbstractScrollArea, QApplication, QFrame, QLabel
 
 from .desktop import ASSETS, MainWindow as RealmWindow, label
 from .world_themes import REALM_NOTICE, THEMES, scenic_svg
+from . import home_art
 
 
 class ScenicHeader(QWidget):
@@ -39,14 +40,19 @@ class ScenicHeader(QWidget):
         layout.addWidget(self.caption)
         layout.addStretch()
         self.setToolTip("Decorative " + theme.expansion + " theme. " + REALM_NOTICE)
+        if theme.key == "home":
+            home_art.prepare_header(self)
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        text_width = max(230, int(self.width() * .52) - 52)
+        fraction = .42 if self.theme.key == "home" else .52
+        text_width = max(230, int(self.width() * fraction) - 52)
         for item in (self.kicker, self.heading, self.caption):
             item.setMaximumWidth(text_width)
 
     def paintEvent(self, event):
+        if self.theme.key == "home" and home_art.paint_header(self):
+            return
         painter = QPainter(self)
         self.renderer.render(painter, QRectF(self.rect()))
         painter.end()
@@ -114,13 +120,14 @@ class MainWindow(RealmWindow):
         self.realm_badge = label(REALM_NOTICE, "realmBadge")
         self.realm_badge.setAccessibleName("Actual realm compatibility")
         sidebar.layout().insertWidget(sidebar.layout().count() - 2, self.realm_badge)
+        home_art.prepare_layout(self)
         self.worlds_ready = True
         self.navigate(0)
 
     def navigate(self, index):
         super().navigate(index)
         if self.worlds_ready:
-            self.setStyleSheet(accent_styles(THEMES[index]))
+            self.setStyleSheet(accent_styles(THEMES[index]) + (home_art.styles() if index == 0 else ""))
 
 
 def smoke(application, destination):
@@ -187,6 +194,8 @@ def main():
         with patch.object(desktop_smoke, "MainWindow", MainWindow):
             desktop_smoke.run(application, sys.argv[2])
         smoke(application, sys.argv[2])
+        from .home_art_smoke import run as run_home_art
+        run_home_art(application, sys.argv[2])
         return 0
     window = MainWindow()
     window.show()
