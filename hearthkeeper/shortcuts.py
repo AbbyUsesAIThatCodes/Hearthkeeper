@@ -26,7 +26,7 @@ def create_shortcut(*, desktop_path=None, data_path=None):
         raise RuntimeError("Could not prepare the shortcut icon.")
     shortcut = win32com.client.Dispatch("WScript.Shell").CreateShortcut(str(target))
     shortcut.TargetPath = str(executable)
-    shortcut.Arguments = "" if frozen else "-m hearthkeeper.desktop"
+    shortcut.Arguments = "" if frozen else "-m hearthkeeper.six_worlds"
     shortcut.WorkingDirectory = str(executable.parent if frozen else package.parent)
     shortcut.Description = "Hearthkeeper - your own Azeroth"
     shortcut.IconLocation = str(icon)

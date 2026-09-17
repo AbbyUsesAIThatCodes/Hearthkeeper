@@ -14,8 +14,8 @@ jobs:
         with:
           python-version: '3.12'
       - run: python -m pip install ".[desktop]" pyinstaller==6.16.0
-      - name: Exercise native widgets from source
-        run: python -m hearthkeeper.desktop --smoke-test var/native-source
+      - name: Exercise native widgets and all six themes from source
+        run: python -m hearthkeeper.six_worlds --smoke-test var/native-source
         env:
           QT_QPA_PLATFORM: offscreen
       - name: Build the desktop executable
@@ -29,6 +29,7 @@ jobs:
             throw "Packaged desktop smoke test failed: $($taskApp.ExitCode)"
           }
           if (!(Test-Path var/native-packaged/result.json)) { throw 'The packaged app did not write its test result.' }
+          if (!(Test-Path var/native-packaged/six-worlds-result.json)) { throw 'The packaged app did not test its six themes.' }
         env:
           QT_QPA_PLATFORM: offscreen
       - name: Install an unsupported default Python to reproduce the launch report
@@ -50,7 +51,7 @@ jobs:
           Write-Output "Default Python was 3.14; the source launcher correctly selected 3.12."
       - uses: actions/upload-artifact@v4
         with:
-          name: Hearthkeeper-0.1.0a5-Windows
+          name: Hearthkeeper-0.1.0a6-Windows
           path: dist/Hearthkeeper/
           retention-days: 30
       - uses: actions/upload-artifact@v4
@@ -59,7 +60,7 @@ jobs:
           name: native-desktop-screenshots
           path: |
             var/native-source/*.png
-            var/native-source/result.json
+            var/native-source/*.json
             var/native-packaged/*.png
-            var/native-packaged/result.json
+            var/native-packaged/*.json
             var/native-packaged/smoke-error.txt
