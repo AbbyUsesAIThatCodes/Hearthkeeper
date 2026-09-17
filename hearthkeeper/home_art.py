@@ -19,7 +19,8 @@ def prepare_header(header):
     except (OSError, ValueError, KeyError, TypeError):
         pass  # Decorative resource errors must not block realm management.
     header.setObjectName("homePortalHero")
-    header.setFixedHeight(280)
+    # Leave room for wrapped Windows labels without resizing inside resizeEvent.
+    header.setFixedHeight(340)
     header.kicker.setText("HOME / THE BURNING CRUSADE")
     header.heading.setText("Your next adventure\nbegins here.")
     header.heading.setStyleSheet('background: transparent; color: #f5e7be; font-family: Georgia, "DejaVu Serif"; font-size: 30px;')
