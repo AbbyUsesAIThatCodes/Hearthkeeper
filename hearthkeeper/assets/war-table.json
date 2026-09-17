@@ -1,0 +1,22 @@
+{
+  "version": 1,
+  "asset": "war-table-atlas.webp",
+  "size": [1024, 544],
+  "sha256": "f8aaa2c0c4ee65ab2d1ee861199c29c6694932953bc458671c2ad34433112ff9",
+  "source_sha256": "005b8697aeb69be9580be6ed6e20b37733ce0530517de02db4731d6fab80296b",
+  "source_size": [1536, 1024],
+  "notice": "Artwork extracted from the generated concept, not a running application. Fictional statuses and controls are not used; plaque and button centers have been cleared. Scene crop contains no lettering. Real controls and state are rendered by Qt.",
+  "regions": {
+    "panorama": {"rect": [0,0,877,258], "source_crop": [640,43,1517,301]},
+    "plaque_frame": {"rect": [0,272,293,166], "source_crop": [303,374,596,540]},
+    "stone": {"rect": [310,272,43,81], "source_crop": [39,714,82,795]},
+    "parchment": {"rect": [370,272,135,156], "source_crop": [945,553,1080,709]},
+    "wood": {"rect": [0,459,166,28], "source_crop": [727,951,893,979]},
+    "realm_medallion": {"rect": [633,272,78,76], "source_crop": [315,393,409,484]},
+    "client_medallion": {"rect": [719,272,78,78], "source_crop": [623,393,711,481]},
+    "red": {"rect": [810,272,37,34], "source_crop": [1150,646,1187,680]},
+    "vellum": {"rect": [864,272,86,44], "source_crop": [770,747,856,791]},
+    "play_frame": {"rect": [310,441,310,90], "source_crop": [1107,614,1495,727]}
+  },
+  "parts": ["war-table.01.b64", "war-table.02.b64", "war-table.03.b64", "war-table.04.b64", "war-table.05.b64", "war-table.06.b64"]
+}
