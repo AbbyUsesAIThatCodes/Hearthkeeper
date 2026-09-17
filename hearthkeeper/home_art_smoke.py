@@ -17,7 +17,7 @@ from .world_themes import THEMES, REALM_NOTICE
 def run(application, directory):
     output = Path(directory)
     output.mkdir(parents=True, exist_ok=True)
-    manifest = json.loads((home_art.ASSETS / "home-art.json").read_text(encoding="utf-8"))
+    manifest = json.loads((home_art.ASSETS / "war-table.json").read_text(encoding="utf-8"))
     assert hashlib.sha256(home_art.read_home_art()).hexdigest() == manifest["sha256"]
     checks = []
     # Startup and navigation must not launch any real process.
@@ -26,14 +26,14 @@ def run(application, directory):
         window.show(); application.processEvents(); QTest.qWait(30)
         header = window.scene_headers[0]
         assert not header.painting.isNull(), "The source/packaged WebP artwork did not load"
-        assert (header.painting.width(), header.painting.height()) == tuple(manifest["raster_size"])
+        assert (header.painting.width(), header.painting.height()) == tuple(manifest["regions"]["panorama"]["rect"][2:])
         assert window.play.__func__ is RealmWindow.play
         assert window.update_play_state.__func__ is RealmWindow.update_play_state
         assert window.realm_path is None and window.worker is None
         assert [label.text() for label in window.card_values] == ["Choose a realm", "Not selected", "Not checked"]
         assert window.realm_badge.text() == REALM_NOTICE
         assert not window.play_button.isEnabled()
-        for width, height in ((1440, 1000), (1240, 880), (980, 700)):
+        for width, height in ((1440, 1280), (1440, 1000), (1240, 880), (980, 700)):
             window.resize(width, height)
             window.navigate(0)
             application.processEvents(); QTest.qWait(30); application.processEvents()
@@ -43,6 +43,11 @@ def run(application, directory):
             assert scroll.horizontalScrollBar().maximum() == 0, f"Home overflow at {width}"
             for label in (header.kicker, header.heading, header.caption):
                 assert label.height() >= label.heightForWidth(label.width()), "Home hero label clipped"
+            scene = header.scene_target
+            assert scene.width() > header.width() * .88, "Panorama must fill the banner width"
+            assert abs(scene.width() / scene.height() - 877 / 258) < .01, "Full panorama aspect ratio must survive"
+            assert header.caption.text() == "The Burning Crusade  ·  Some gates should never close."
+            assert window.material_library.valid and len(window.material_skins) >= 15
             assert window.grab().save(str(output / f"home-painted-{width}x{height}.png"))
             deck = window.home_launch_deck
             expected = QBoxLayout.Direction.LeftToRight if deck.width() >= 850 else QBoxLayout.Direction.TopToBottom

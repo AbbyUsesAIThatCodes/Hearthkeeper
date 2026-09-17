@@ -45,8 +45,10 @@ class ScenicHeader(QWidget):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        fraction = .42 if self.theme.key == "home" else .52
-        text_width = max(230, int(self.width() * fraction) - 52)
+        if self.theme.key == "home":
+            home_art.resize_header(self)
+            return
+        text_width = max(230, int(self.width() * .52) - 52)
         for item in (self.kicker, self.heading, self.caption):
             item.setMaximumWidth(text_width)
 

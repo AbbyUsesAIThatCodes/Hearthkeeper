@@ -18,6 +18,9 @@ jobs:
         run: python -m hearthkeeper.six_worlds --smoke-test var/native-source
         env:
           QT_QPA_PLATFORM: offscreen
+      - name: Emit real native Home preview for visual review
+        if: always()
+        run: python tests/emit_home_preview.py var/native-source
       - name: Build the desktop executable
         run: python build_desktop.py
       - name: Exercise the packaged executable
@@ -52,7 +55,7 @@ jobs:
           Write-Output "Default Python was 3.14; the source launcher correctly selected 3.12."
       - uses: actions/upload-artifact@v4
         with:
-          name: Hearthkeeper-0.1.0a7-Windows
+          name: Hearthkeeper-0.1.0a8-Windows
           path: dist/Hearthkeeper/
           retention-days: 30
       - uses: actions/upload-artifact@v4

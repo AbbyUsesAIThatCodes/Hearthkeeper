@@ -73,10 +73,10 @@ class HomeArtTests(unittest.TestCase):
     def test_version_and_asset_packaging(self):
         from hearthkeeper import __version__, CODENAME
         project = tomllib.loads((ROOT / "pyproject.toml").read_text(encoding="utf-8"))
-        self.assertEqual(__version__, "0.1.0a7")
+        self.assertEqual(__version__, "0.1.0a8")
         self.assertEqual(project["project"]["version"], __version__)
-        self.assertEqual(CODENAME, "The Portal Awakens")
-        self.assertIn("assets/*", project["tool"]["setuptools"]["package-data"]["hearthkeeper"])
+        self.assertEqual(CODENAME, "At the War Table")
+        self.assertIn("assets/*", project["tool.setuptools"]["package-data"]["hearthkeeper"])
 
 
 if __name__ == "__main__":
