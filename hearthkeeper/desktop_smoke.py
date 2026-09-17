@@ -5,7 +5,7 @@ from pathlib import Path
 import sys
 import time
 import webbrowser
-from unittest.mock import patch
+from unittest.mock import Mock, patch
 
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
@@ -36,6 +36,7 @@ def run(application, directory):
         brand = window.findChild(type(window.card_values[0]), "brand")
         assert brand.fontMetrics().horizontalAdvance(brand.text()) <= brand.width(), "Brand is clipped"
         window.grab().save(str(directory / "desktop-realm.png"))
+        exercise_home(application, window, directory)
         window.show_archive(archive); application.processEvents()
         assert window.pages.currentIndex() == 2 and window.nav_buttons[2].isChecked()
         panel = window.archive_panel
@@ -117,4 +118,80 @@ def run(application, directory):
             raise AssertionError("An existing shortcut was replaced")
     window.close(); application.processEvents()
     (directory / "result.json").write_text(json.dumps({"passed": True, "native_widgets": True,
-        "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes", "source filtering", "acquisition availability", "saved source copy"]}))
+        "checks": ["offline startup", "archive search", "module and coverage views", "literal archived text", "worker completion", "desktop sizes", "source filtering", "acquisition availability", "saved source copy", "client selection", "realmlist confirmation and backup", "Play success and failure", "duplicate Play prevention", "home minimum size"]}))
+
+
+def exercise_home(application, window, directory):
+    """Exercise real widgets/workers against a clearly fictional realm; never start Docker/WoW."""
+    from .client import EXPECTED_VERSION
+    from .server.manager import create_realm, ManagedRealm
+    from .desktop import QFileDialog, QMessageBox
+    game = directory / "fictional-client"
+    (game / "Data" / "enUS").mkdir(parents=True)
+    for relative in ("Wow.exe", "Data/lichking.MPQ", "Data/patch-3.MPQ"):
+        (game / relative).write_bytes(b"Fictional test data only")
+    connection = game / "Data" / "enUS" / "realmlist.wtf"
+    original = b"set realmlist example.invalid\r\n"
+    connection.write_bytes(original)
+    realm = create_realm(directory / "fictional-realm", name="First Campfire - demo",
+                         data_path=str(game), data_kind="client", docker_context="default")
+    realm.config["phase"] = "installed"; realm.save()
+    ready = [{"Service": name, "State": "running", "Health": "healthy"} for name in ("auth", "world", "database")]
+    def finish_worker():
+        deadline = time.monotonic() + 10
+        while window.worker and time.monotonic() < deadline:
+            application.processEvents(); QTest.qWait(5)
+        assert window.worker is None, "Play worker did not complete"
+    with patch("hearthkeeper.client.windows_file_version", return_value=EXPECTED_VERSION):
+        assert not window.play_button.isEnabled()
+        window.select_realm(realm.path)
+        assert not window.play_button.isEnabled()
+        with patch.object(QFileDialog, "getOpenFileName", return_value=(str(game / "Wow.exe"), "")):
+            window.choose_client()
+        assert window.client is not None and not window.play_button.isEnabled()
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.No):
+            window.connect_client()
+        assert connection.read_bytes() == original
+        with patch.object(QMessageBox, "question", return_value=QMessageBox.StandardButton.Yes):
+            window.connect_client()
+        assert list(connection.parent.glob("*.bak"))[0].read_bytes() == original
+        assert window.play_button.isEnabled()
+        window.resize(1240, 880); application.processEvents(); QTest.qWait(30)
+        window.grab().save(str(directory / "desktop-home-ready.png"))
+        window.resize(980, 700); application.processEvents(); QTest.qWait(30)
+        scroll = window.pages.widget(0)
+        if scroll.horizontalScrollBar().maximum():
+            from PySide6.QtWidgets import QWidget
+            window.grab().save(str(directory / "desktop-home-overflow.png"))
+            details = [(type(item).__name__, item.objectName(), item.minimumSizeHint().width(), item.width(), getattr(item, "text", lambda: "")()[:100])
+                       for item in scroll.widget().findChildren(QWidget) if item.minimumSizeHint().width() > scroll.viewport().width() - 100]
+            raise AssertionError("Home overflows horizontally: " + str((scroll.viewport().width(), scroll.widget().width(), [(i, scroll.widget().layout().itemAt(i).minimumSize().width()) for i in range(scroll.widget().layout().count())], details)))
+        scroll.ensureWidgetVisible(window.play_button); application.processEvents()
+        window.grab().save(str(directory / "desktop-home-small.png"))
+        process = Mock(); process.poll.return_value = None
+        with patch.object(ManagedRealm, "status", return_value=ready), patch.object(ManagedRealm, "start") as start, patch("hearthkeeper.desktop.launch_client", return_value=process) as launch:
+            QTest.mouseClick(window.play_button, Qt.MouseButton.LeftButton)
+            window.play()  # A second request during startup must be ignored.
+            finish_worker()
+            launch.assert_called_once(); start.assert_not_called()
+            assert not window.play_button.isEnabled() and window.play_button.text() == "GAME RUNNING"
+            window.play(); launch.assert_called_once()
+        process.poll.return_value = 0; window.game_tick()
+        assert window.play_button.isEnabled()
+        with patch.object(ManagedRealm, "status", side_effect=RuntimeError("Fictional Docker failure")), patch("hearthkeeper.desktop.launch_client") as launch, patch.object(QMessageBox, "warning") as warning:
+            window.play(); finish_worker()
+            launch.assert_not_called(); warning.assert_called_once()
+            assert "Fictional Docker failure" in window.activity.toPlainText()
+        # Cancellation after the worker returns but before Qt delivers finished must still suppress launch.
+        late_launch = Mock()
+        window.run_job("Late cancellation test", lambda runner: "complete", late_launch, cancel_callback_on_stop=True)
+        assert window.worker.wait(10000)
+        window.worker.runner.stop_after_step.set()
+        finish_worker()
+        late_launch.assert_not_called()
+        # Reopening the same realm restores the saved executable and locale.
+        window.select_realm(realm.path)
+        assert window.client.executable == (game / "Wow.exe").resolve()
+        window.resize(1240, 880); scroll.verticalScrollBar().setValue(0)
+    # Other offline smoke checks must not read the fictional executable as a real PE file.
+    window.realm_path = None; window.client = None; window.update_play_state()

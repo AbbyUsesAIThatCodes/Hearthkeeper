@@ -60,3 +60,21 @@ without making the application depend on downloaded game graphics.
 
 Qt and its libraries remain separately distributed with notices and upstream
 source references. See [third-party notices](../THIRD_PARTY_NOTICES.md).
+
+## Through the Gates home screen
+
+`client.py` owns Windows executable metadata inspection, client/locale validation,
+local realmlist preparation, service-health gating, and game launch. It uses the
+standard-library Windows version API and never executes a file to identify it.
+The file version and expected-file checks establish structural compatibility;
+they do not authenticate an executable or verify the full MPQ contents.
+
+`desktop.py` stores the chosen executable/locale in QSettings per realm path.
+Play uses the existing Worker and ManagedRealm start path, then launches WoW in
+its installation directory. Only a process launched by this application instance
+is tracked to prevent duplicate clicks. No external game processes are scanned.
+The UI never starts services merely by opening the home screen.
+
+Original vector artwork and the shared QSS theme are packaged with the app.
+`__ASSETS__` is resolved at runtime for both source and PyInstaller installations.
+No remote artwork or browser runtime is required.
