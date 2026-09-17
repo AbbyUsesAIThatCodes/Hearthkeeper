@@ -47,8 +47,22 @@ class ScenicHeader(QWidget):
         super().resizeEvent(event)
         fraction = .42 if self.theme.key == "home" else .52
         text_width = max(230, int(self.width() * fraction) - 52)
-        for item in (self.kicker, self.heading, self.caption):
+        texts = (self.kicker, self.heading, self.caption)
+        for item in texts:
             item.setMaximumWidth(text_width)
+        if self.theme.key == "home":
+            # Windows font metrics need more space than a fixed-height concept header.
+            # Reserve each native label's actual wrapped height; never hide overflow.
+            heights = []
+            for item in texts:
+                item.ensurePolished()
+                needed = max(1, item.heightForWidth(text_width)) + 4
+                item.setFixedHeight(needed)
+                heights.append(needed)
+            margins = self.layout().contentsMargins()
+            needed = sum(heights) + margins.top() + margins.bottom() + self.layout().spacing() * 3 + 8
+            self.setFixedHeight(max(280, needed))
+            self.layout().activate()
 
     def paintEvent(self, event):
         if self.theme.key == "home" and home_art.paint_header(self):
