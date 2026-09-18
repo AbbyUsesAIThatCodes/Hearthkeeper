@@ -1,8 +1,9 @@
-# Test the desktop PR
+# Test the current desktop preview
 
-This branch is `feature/warcraft-home` and the version is **0.1.0a5**.
-It builds on the still-open desktop realm manager PR #5. The PR description records
-the exact commit and CI outcomes; do not infer gameplay readiness from packaging checks.
+The current version is **0.1.0a8 — At the War Table**, available from **main** and
+the [Windows release](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/tag/v0.1.0a8).
+See [the recovery record](RECOVERY.md) for the exact restored commit and build
+evidence. Packaging checks do not establish live gameplay readiness.
 
 ## Without Docker or game files
 
@@ -42,7 +43,7 @@ successful backup. Keep normal realm backups until restoration is tested.
 
 ## Automated evidence
 
-- 48 unit tests cover archive preservation, ownership boundaries, damaged files,
+- 66 unit tests cover archive preservation, artwork integrity, ownership boundaries, damaged files,
   local-only Compose bindings, read-only game mounts, incomplete data, failed-import
   state, concurrent-operation locks, remote Docker rejection, and password redaction.
 - The native Qt smoke test checks startup without processes/browser calls, archive
@@ -55,6 +56,13 @@ successful backup. Keep normal realm backups until restoration is tested.
 - The runtime image checks shared libraries for the core and all extraction tools;
   the world binary must initialize its databases before rejecting absent game maps.
 - Existing Windows/Linux archive, Chromium HTML-viewer, and fictional MySQL checks remain.
+
+Run the dependency-free suite with `python -m unittest discover -s tests -v`.
+In a supported Python 3.11–3.13 environment with `.[desktop]` installed, run
+`python -m hearthkeeper.six_worlds --smoke-test var/native-source` with
+`QT_QPA_PLATFORM=offscreen`. The Windows package accepts the same `--smoke-test`
+argument. Acceptance writes `result.json`, `six-worlds-result.json`, and
+`home-art-result.json`; all three must report `passed: true`.
 
 Game data extraction, world startup, in-game behavior, and restore remain separate
 acceptance gates. CI's placeholder data is never passed to a worldserver.

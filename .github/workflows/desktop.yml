@@ -1,5 +1,7 @@
 name: Native desktop
 on:
+  push:
+    branches: [main]
   pull_request:
   workflow_dispatch:
 permissions:
@@ -13,6 +15,13 @@ jobs:
       - uses: actions/setup-python@v5
         with:
           python-version: '3.12'
+      - name: Read the application version
+        id: version
+        shell: pwsh
+        run: |
+          $taskVersion = python -c "from hearthkeeper import __version__; print(__version__)"
+          if ($LASTEXITCODE -ne 0) { throw 'Could not read the application version.' }
+          "artifact=Hearthkeeper-$taskVersion-Windows" >> $env:GITHUB_OUTPUT
       - run: python -m pip install ".[desktop]" pyinstaller==6.16.0
       - name: Exercise native widgets and all six themes from source
         run: python -X faulthandler -u -m hearthkeeper.six_worlds --smoke-test var/native-source
@@ -23,7 +32,7 @@ jobs:
       - name: Exercise the packaged executable
         shell: pwsh
         run: |
-          $taskApp = Start-Process -FilePath .\dist\Hearthkeeper\Hearthkeeper.exe -ArgumentList '--smoke-test', 'var/native-packaged' -PassThru -Wait
+          $taskApp = Start-Process -FilePath .\dist\Hearthkeeper\Hearthkeeper.exe -ArgumentList '--smoke-test', 'var/native-packaged' -WindowStyle Hidden -PassThru -Wait
           if ($taskApp.ExitCode -ne 0) {
             if (Test-Path var/native-packaged/smoke-error.txt) { Get-Content var/native-packaged/smoke-error.txt }
             throw "Packaged desktop smoke test failed: $($taskApp.ExitCode)"
@@ -52,7 +61,7 @@ jobs:
           Write-Output "Default Python was 3.14; the source launcher correctly selected 3.12."
       - uses: actions/upload-artifact@v4
         with:
-          name: Hearthkeeper-0.1.0a8-Windows
+          name: ${{ steps.version.outputs.artifact }}
           path: dist/Hearthkeeper/
           retention-days: 30
       - uses: actions/upload-artifact@v4

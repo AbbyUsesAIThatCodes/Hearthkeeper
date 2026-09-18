@@ -1,5 +1,8 @@
 # Six Worlds, One Hearth — recovery checkpoint
 
+Historical checkpoint from before the a6 reconstruction. That reconstruction and
+the a8 follow-up are now preserved; see the [current recovery record](RECOVERY.md).
+
 This branch starts at the verified a5 merge `57d3800d340511b2283721d46ffb87420632e5ef` on `feature/source-catalog`. It reconstructs the interrupted a6 interface work; it is not a recovery of the original unpublished source or artwork.
 
 ## Approved design

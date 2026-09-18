@@ -1,5 +1,8 @@
 # 0.1.0a6 — Six Worlds, One Hearth
 
+Historical implementation notes. For the current **0.1.0a8** download and source
+branch, use [README.md](../README.md). The original instructions below describe a6.
+
 This is a new reconstruction from the saved a5 release, not the missing original a6 files. The decorative headers are new, stylized vector illustrations rather than recovered painterly artwork. No Blizzard assets or fonts were copied.
 
 ## What changes

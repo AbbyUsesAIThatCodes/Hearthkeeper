@@ -1,6 +1,6 @@
 # Hearthkeeper
 
-**0.1.0a5 — Through the Gates · native desktop development preview**
+**Current preview: 0.1.0a8 — At the War Table**
 
 A desktop home for your personal Azeroth: install and manage a progression realm,
 preserve character records, and eventually build your own towns, instances, and regions.
@@ -8,18 +8,24 @@ The main application uses native Qt windows. It does not run in a browser.
 
 ## Open the desktop app
 
-**Packaged Windows app (no Python):** run **Download-Windows-Preview.bat**, or open
-[Native desktop builds](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%3Afeature%2Fwarcraft-home).
-Sign into GitHub **in your browser**; GitHub Desktop's sign-in is separate.
-Open a successful run for `feature/warcraft-home`, scroll to **Artifacts**,
-and select **Hearthkeeper-0.1.0a5-Windows**. Extract the entire ZIP, then open
-**Hearthkeeper.exe**. Keep the accompanying `_internal` folder beside it.
-No Python installation is needed. Click **Desktop shortcut** once to create an icon.
-This development build is unsigned; a signed distribution is a later packaging step.
-Artifacts expire after 30 days. A direct artifact link can show a 404 when you are
-signed out, lack access, or the artifact has expired; use the build list above.
+### Windows — download and play
 
-**GitHub Desktop / source:** fetch and select `feature/warcraft-home`,
+**[Download Hearthkeeper 0.1.0a8 for Windows](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/download/v0.1.0a8/Hearthkeeper-0.1.0a8-Windows.zip)**
+
+1. Download the ZIP and choose **Extract All** into a new folder.
+2. Open **Hearthkeeper.exe** inside that folder. Keep `_internal` beside it.
+3. Choose **Open realm** to use your existing realm folder containing `realm.json`.
+
+No Python installation or visit to Actions is needed. **Download-Windows-Preview.bat**
+opens the [release page](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/tag/v0.1.0a8),
+which includes the Windows ZIP, release notes, and checksums. Choose the Windows ZIP;
+GitHub's automatic **Source code** downloads do not contain the executable.
+Release downloads are preserved separately from expiring Actions artifacts.
+Click **Desktop shortcut** in the app to create an icon. This preview is unsigned.
+
+### Source code — use main
+
+**GitHub Desktop / source:** fetch, select **main**, and pull the latest changes,
 then run **Start-Hearthkeeper.bat**. This route needs Python **3.11–3.13**
 (3.12 recommended). The launcher searches for an installed supported version even
 when Windows defaults to Python 3.14 or another unsupported version. If none is
@@ -35,6 +41,21 @@ anything or opening the app, run `Start-Hearthkeeper.bat --check-python` in a te
 
 You can explore **Archives → Meet Brindle · demo** without Docker, game files,
 or an account. This is the same fictional archive, now displayed in native widgets.
+
+## Where to find things
+
+| You want to… | Go here |
+| --- | --- |
+| Run the current Windows preview | [Download 0.1.0a8](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/download/v0.1.0a8/Hearthkeeper-0.1.0a8-Windows.zip) |
+| Browse or work on the current code | **main**, the default branch |
+| See what comes next | [Roadmap](docs/ROADMAP.md) |
+| Understand the repository recovery | [Recovery record](docs/RECOVERY.md) |
+| Review automated build evidence | [Actions](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions) — for development checks |
+
+Older feature branches preserve development history; you do not need to choose
+between them to use Hearthkeeper. Current work continues from **main**, with pull
+requests for changes. The a8 Home uses painted stone, wood, parchment, and the full
+portal panorama; the other five pages retain their Six Worlds themes.
 
 ## Play from your new home screen
 
@@ -111,7 +132,8 @@ The command-line archive tools and optional offline HTML export remain available
 
 ## Validation and remaining gates
 
-The project has 48 unit tests covering archive behavior, realm boundaries, source preservation, and failure handling.
+The project has 66 unit tests covering archives, realm boundaries, source
+preservation, client safeguards, themes, and verified artwork.
 The native acceptance check exercises actual Qt widgets, including archive search,
 module/coverage views, literal archived text, and background work. Windows CI builds
 and tests the packaged executable.

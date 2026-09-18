@@ -1,5 +1,34 @@
 # Changelog
 
+## Repository recovery — 2026-09-17
+
+- Reunited the preserved development history on main, which had still shown only
+  the initial README; retained the older branches as recovery references.
+- Identified 0.1.0a8 as the current preview and replaced outdated branch/Actions
+  download instructions with a versioned Windows release and checksums.
+- Updated the roadmap and testing guide to distinguish completed implementation,
+  successful automated checks, and remaining user acceptance.
+
+## 0.1.0a8 — At the War Table
+
+- Painted stone, wood, vellum, map details, framed controls, and icon medallions
+  on the native Home widgets, with verified bundled material assets.
+- Full portal panorama fitted without cropping, native wrapping captions, and
+  Windows font/layout fixes; existing Play and realm safeguards retained.
+- Source and packaged Windows acceptance for Home materials, all six themes,
+  archive and client workflows, and missing-art fallback.
+
+## 0.1.0a7 — The Portal Awakens
+
+- Bundled painterly Home artwork, native launch desk, and responsive layout.
+- Preserved artwork provenance and checksums, with vector fallback.
+
+## 0.1.0a6 — Six Worlds, One Hearth
+
+- Reconstructed the six themed pages from the preserved a5 implementation.
+- Kept realm operations and original Wrath compatibility separate from decoration.
+- Added theme integrity and native six-page acceptance checks.
+
 ## 0.1.0a5 — Through the Gates
 
 - Native Warcraft-inspired home screen, winter-gate vector artwork, framed navigation icons,

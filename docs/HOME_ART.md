@@ -1,5 +1,8 @@
 # 0.1.0a7 — The Portal Awakens
 
+Historical implementation notes. **0.1.0a8** supersedes this preview; use the
+[current download](../README.md) and [Home materials guide](HOME_MATERIALS.md).
+
 A Home-only painterly pass over the merged a6 build. This is an implementation of the visual direction, not a pixel-for-pixel copy of the generated mockup.
 
 ## What is real

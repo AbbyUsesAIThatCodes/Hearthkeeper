@@ -11,10 +11,29 @@ and a gnome, entering the world, and fighting a wolf with the 0.1.0a3 setup.
 This establishes user-reported first-login success. Companion play, broader game
 systems, backup restoration, and remote deployment still need acceptance.
 
-Keep the following five milestones in order. The first home-screen slice is
-implemented in 0.1.0a5 (see HOME.md): artwork/theme, client selection, connection
-backup, and the Play flow. Live Windows/WoW acceptance remains to be recorded.
-The remaining capabilities are planned.
+Keep the following five milestones in order. The current preview is **0.1.0a8 —
+At the War Table**, preserved on **main** with a direct Windows release download.
+The a5 client/Play safeguards, a6 Six Worlds presentation, and a7/a8 painted Home
+are implemented. See [recovery and evidence](RECOVERY.md), [Home](HOME.md), and
+[Home materials](HOME_MATERIALS.md). Live Windows/WoW acceptance remains to be
+recorded; Luna migration and the later capabilities remain planned.
+
+### Next reviewable work
+
+1. **Accept the recovered a8 preview.** Open the existing realm, check all six
+   pages and small-window readability, then verify Play with the realm initially
+   stopped and already running. Log into the existing gnome. Record any visual
+   changes still wanted before calling the first milestone complete.
+2. **Prepare Luna migration.** Record the target host and access method, inventory
+   the existing realm's exact versions, and implement a complete backup/restore
+   rehearsal in a disposable destination before changing the working local realm.
+3. **Prove continuity on Luna.** Add remote management and a client connection
+   path, restore the complete realm, and verify the existing character in game.
+   Keep the local realm until that acceptance succeeds.
+
+Acquisition automation, additional eras, extensions, and the content workshop
+follow in the agreed order. The repository repair does not count as migration or
+live gameplay acceptance.
 
 | Order | Milestone | Reviewable outcome |
 | --- | --- | --- |
@@ -37,9 +56,10 @@ it is ready, and how to play. Provide clear access to characters, companions,
 installations, and backups. Surface the reason and next action when Play is
 unavailable. An operation's progress must describe real work.
 
-A prior conversation mentioned an 0.1.0a4 “Hearth & Parchment” draft. Locate and
-inspect any recoverable draft before duplicating it; its implementation has not
-been verified in this branch.
+A prior conversation mentioned an 0.1.0a4 “Hearth & Parchment” draft. The repository
+recovery found no original unpublished a4/a6 implementation in either local copy
+or the fetched history. Preserve that uncertainty; a5–a8 are the available,
+verified implementations rather than a claim to have recovered those drafts.
 
 ### Downloads and extensions
 

@@ -1,8 +1,7 @@
 @echo off
 setlocal
-echo Opening Hearthkeeper's Native desktop builds in your browser.
-echo Sign into the same GitHub account you use in GitHub Desktop.
-echo Open a successful run for feature/warcraft-home and scroll to Artifacts.
-echo Download Hearthkeeper-0.1.0a5-Windows, extract the WHOLE ZIP, then run Hearthkeeper.exe.
-echo This download route does not need Python. GitHub artifacts expire after 30 days.
-start "" "https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/actions/workflows/desktop.yml?query=branch%%3Afeature%%2Fwarcraft-home"
+echo Opening Hearthkeeper 0.1.0a8 - At the War Table.
+echo Under Assets, download Hearthkeeper-0.1.0a8-Windows.zip.
+echo Extract the WHOLE ZIP, then run Hearthkeeper.exe. Keep _internal beside it.
+echo No Python or Actions navigation is needed. Source code ZIPs are not the app.
+start "" "https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/tag/v0.1.0a8"

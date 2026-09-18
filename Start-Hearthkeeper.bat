@@ -29,9 +29,9 @@ echo No supported Python installation was found for the SOURCE launcher.
 echo Hearthkeeper's desktop toolkit needs Python 3.11, 3.12, or 3.13.
 echo.
 echo The packaged Windows app needs NO Python:
-echo   Run Download-Windows-Preview.bat and sign into GitHub in your browser.
-echo   Open a successful Native desktop run and scroll down to Artifacts.
-echo   Download Hearthkeeper-0.1.0a2-Windows, extract ALL files, and run Hearthkeeper.exe.
+echo   Run Download-Windows-Preview.bat to open the current release.
+echo   Download Hearthkeeper-0.1.0a8-Windows.zip under Assets.
+echo   Extract ALL files, and run Hearthkeeper.exe with _internal beside it.
 echo.
 echo To run from source, install a supported Python alongside your existing version.
 echo You do not need to uninstall Python or change your system default.
