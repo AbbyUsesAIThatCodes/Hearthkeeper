@@ -1,6 +1,6 @@
 """Tactile painting of existing widgets; their signals and behavior are untouched."""
 from PySide6.QtCore import QObject, QEvent, QPointF, QRectF, Qt
-from PySide6.QtGui import QColor, QPainter, QPen, QPixmap
+from PySide6.QtGui import QColor, QFontMetrics, QPainter, QPen, QPixmap
 from .material_assets import REGIONS, read_material_atlas
 
 
@@ -67,14 +67,15 @@ class MaterialSkin(QObject):
         if self.kind == "desk":
             p.fillRect(r, QColor("#291b11"))
             tiled(p, r, art.image("wood"))
-            p.fillRect(r, QColor(23, 14, 8, 135))
+            p.fillRect(r, QColor(23, 14, 8, 185))
             return
         if self.kind == "parchment":
             p.fillRect(r, QColor("#ddbd80"))
-            tiled(p, r, art.image("vellum"))
+            vellum = art.image("vellum")
+            p.drawPixmap(r, vellum, QRectF(vellum.rect()))
             p.fillRect(r, QColor(233, 209, 158, 175))
             p.save()
-            p.setOpacity(.43)
+            p.setOpacity(.23)
             map_art = art.image("parchment")
             h = max(1, r.height() - 30)
             w = h * map_art.width() / max(1, map_art.height())
@@ -90,11 +91,14 @@ class MaterialSkin(QObject):
                     p.fillRect(r, QColor(255, 159, 65, 30))
             p.save()
             p.setOpacity(1 if widget.isEnabled() else .42)
-            frame(p, r, art.image("play_frame"), 17, 22)
+            frame(p, r, art.image("plaque_frame"), 18, 13)
             p.restore()
-            p.setFont(widget.font())
             p.setPen(QColor("#ffe4a1") if widget.isEnabled() else QColor("#b2a48a"))
             text = r.adjusted(19, 10, -19, -10)
+            font = widget.font()
+            while QFontMetrics(font).horizontalAdvance(widget.text()) > text.width() and font.pixelSize() > 15:
+                font.setPixelSize(font.pixelSize() - 1)
+            p.setFont(font)
             if widget.isDown():
                 text.translate(0, 1)
             p.drawText(text, int(Qt.AlignmentFlag.AlignCenter), widget.text())
@@ -110,10 +114,10 @@ class MaterialSkin(QObject):
                 p.fillRect(r, QColor(53, 107, 31, 110))
             if self.kind in ("nav", "button") and widget.underMouse() and widget.isEnabled():
                 p.fillRect(r, QColor(180, 144, 72, 28))
-        frame(p, r, art.image("plaque_frame"), 18, 22 if self.kind not in ("nav", "button") else 12)
+        frame(p, r, art.image("plaque_frame"), 18, 15 if self.kind not in ("nav", "button") else 9)
         if self.medallion:
             icon = art.image(self.medallion)
-            p.drawPixmap(QRectF(16, 26, 60, 60), icon, QRectF(icon.rect()))
+            p.drawPixmap(QRectF(12, (r.height()-34)/2, 34, 34), icon, QRectF(icon.rect()))
         if self.kind == "button":
             if not widget.isEnabled():
                 p.fillRect(r.adjusted(2, 2, -2, -2), QColor(25, 25, 22, 160))

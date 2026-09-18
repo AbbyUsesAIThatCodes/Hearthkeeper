@@ -1,7 +1,9 @@
 # Test the current desktop preview
 
-The current version is **0.1.0a8 — At the War Table**, available from **main** and
-the [Windows release](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/tag/v0.1.0a8).
+This branch is **0.1.0a9 — The Living Hearth**. Its Windows package is produced by
+the PR's **Native desktop** workflow. The
+[a8 Windows release](https://github.com/AbbyUsesAIThatCodes/Hearthkeeper/releases/tag/v0.1.0a8)
+remains available as a fallback. See [a9 acceptance](LIVING_HEARTH.md).
 See [the recovery record](RECOVERY.md) for the exact restored commit and build
 evidence. Packaging checks do not establish live gameplay readiness.
 
@@ -49,6 +51,9 @@ successful backup. Keep normal realm backups until restoration is tested.
 - The native Qt smoke test checks startup without processes/browser calls, archive
   search, module/coverage views, literal text handling, and background work.
 - Windows CI repeats the native checks inside the packaged executable.
+- The a9 Windows package repeats the suite at 125% and 150% Qt display scaling.
+  Home checks both empty and selected-client layouts without scrolling, including
+  a 1280 × 650 logical work area, tools/activity access, and the motion preference.
 - Windows CI also reproduces a Python 3.14 default with Python 3.12 installed
   alongside it, then checks that the BAT source launcher selects the supported one.
 - The real-source build gate compiles the selected stack, imports upstream SQL,

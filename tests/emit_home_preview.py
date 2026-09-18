@@ -6,7 +6,7 @@ from PySide6.QtCore import QByteArray, QBuffer, QIODevice, Qt
 from PySide6.QtGui import QImage
 
 root = Path(sys.argv[1])
-candidates = [root/'home-painted-1440x1280.png', root/'home-painted-1440x1000.png', root/'desktop-home-ready.png', root/'desktop-realm.png']
+candidates = [root/'home-painted-1366x700.png', root/'home-painted-1280x650.png', root/'desktop-home-ready.png', root/'desktop-realm.png']
 source = next((p for p in candidates if p.is_file()), None)
 if source is None:
     print('No native screenshot was produced before failure.')

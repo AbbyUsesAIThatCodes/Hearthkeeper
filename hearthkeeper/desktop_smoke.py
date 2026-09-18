@@ -9,6 +9,7 @@ from unittest.mock import Mock, patch
 
 from PySide6.QtCore import Qt
 from PySide6.QtTest import QTest
+from PySide6.QtWidgets import QLabel
 from .archive import write_archive
 from .database import capture, sqlite_reader
 from .demo import create_fixture
@@ -33,7 +34,7 @@ def run(application, directory):
         window = MainWindow(remember=False)
         window.show(); application.processEvents(); QTest.qWait(50)
         assert window.pages.count() == 6
-        brand = window.findChild(type(window.card_values[0]), "brand")
+        brand = window.findChild(QLabel, "brand")
         assert brand.fontMetrics().horizontalAdvance(brand.text()) <= brand.width(), "Brand is clipped"
         window.grab().save(str(directory / "desktop-realm.png"))
         exercise_home(application, window, directory)
@@ -168,6 +169,14 @@ def exercise_home(application, window, directory):
             raise AssertionError("Home overflows horizontally: " + str((scroll.viewport().width(), scroll.widget().width(), [(i, scroll.widget().layout().itemAt(i).minimumSize().width()) for i in range(scroll.widget().layout().count())], details)))
         scroll.ensureWidgetVisible(window.play_button); application.processEvents()
         window.grab().save(str(directory / "desktop-home-small.png"))
+        if hasattr(window, "home_presentation"):
+            for width, height in ((1366, 700), (1280, 650), (980, 640)):
+                window.resize(width, height); application.processEvents(); QTest.qWait(60)
+                assert scroll.verticalScrollBar().maximum() == 0, "Selected-client Home must fit without scrolling"
+                assert scroll.horizontalScrollBar().maximum() == 0
+                for text in (window.client_title, window.client_notice, window.play_notice):
+                    assert text.height() >= text.heightForWidth(text.width()), "Selected-client text clipped"
+                assert window.grab().save(str(directory / f"home-ready-{width}x{height}.png"))
         process = Mock(); process.poll.return_value = None
         with patch.object(ManagedRealm, "status", return_value=ready), patch.object(ManagedRealm, "start") as start, patch("hearthkeeper.desktop.launch_client", return_value=process) as launch:
             QTest.mouseClick(window.play_button, Qt.MouseButton.LeftButton)

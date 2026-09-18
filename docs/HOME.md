@@ -1,8 +1,9 @@
-# Through the Gates — home and Play
+# The Living Hearth — Home and Play
 
-Version 0.1.0a5 delivers the first agreed interface milestone in native Qt.
+Version 0.1.0a9 refines the original a5 Play flow in native Qt. See
+[The Living Hearth](LIVING_HEARTH.md) for layout, motion, and validation details.
 
-![Home with fictional realm and client fixtures](images/hearthkeeper-home.png)
+![Home with fictional realm and client fixtures](images/living-hearth.jpg)
 
 ## Start an adventure
 
@@ -40,10 +41,13 @@ wrong-version installations must be selected again.
   still available under **Characters**.
 - Closing Hearthkeeper leaves the game and running realm alone. Use **Realm tools →
   Stop realm** for a deliberate shutdown.
-- Home scrolls at smaller window sizes; existing pages retain their native tables,
-  search, and editing controls. Artwork and icons are original local SVG assets.
+- Home fits without scrolling at the tested work areas down to 980 × 640.
+  **Realm tools…** and **Activity…** open separate windows. Other pages retain
+  scrolling for their lists and content.
+- **Scene motion** remembers whether to show the subtle portal animation. Turn
+  it off for a still scene. The complete a8 artwork and local SVG fallback remain.
 
-**Companion guide** supplies basic Playerbots commands. Addon/module installation,
+**Realm tools → Companion guide** supplies basic Playerbots commands. Addon/module installation,
 Luna deployment, torrent integration, and other-era game launching remain future work.
 Windows is the supported game-launch platform; Linux still supports realm/archive operations.
 

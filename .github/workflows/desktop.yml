@@ -46,6 +46,26 @@ jobs:
         uses: actions/setup-python@v5
         with:
           python-version: '3.14'
+      - name: Check the packaged Home at 125 and 150 percent display scaling
+        shell: pwsh
+        env:
+          QT_QPA_PLATFORM: offscreen
+        run: |
+          foreach ($taskScale in @('1.25', '1.5')) {
+            $env:QT_SCALE_FACTOR = $taskScale
+            $taskOutput = "var/native-scale-$taskScale"
+            $taskApp = Start-Process -FilePath .\dist\Hearthkeeper\Hearthkeeper.exe -ArgumentList '--smoke-test', $taskOutput -WindowStyle Hidden -PassThru -Wait
+            if ($taskApp.ExitCode -ne 0) {
+              if (Test-Path "$taskOutput/smoke-error.txt") { Get-Content "$taskOutput/smoke-error.txt" }
+              throw "Scaled packaged desktop failed at $taskScale"
+            }
+            $taskResults = Get-Content "$taskOutput/home-art-result.json" | ConvertFrom-Json
+            if (!$taskResults.passed) { throw "No passing Home result at $taskScale" }
+            foreach ($taskView in $taskResults.views) {
+              if ([Math]::Abs($taskView.device_pixel_ratio - [double]$taskScale) -gt 0.01) { throw 'Requested scale was not applied.' }
+            }
+          }
+          Remove-Item Env:QT_SCALE_FACTOR
       - name: Select supported Python when the Windows default is 3.14
         shell: pwsh
         env:
@@ -75,3 +95,6 @@ jobs:
             var/native-packaged/*.png
             var/native-packaged/*.json
             var/native-packaged/smoke-error.txt
+            var/native-scale-*/*.png
+            var/native-scale-*/*.json
+            var/native-scale-*/*.txt
