@@ -31,7 +31,7 @@ QLabel#sceneValue { font-size: 17px; font-weight: bold; }
 QLabel#sceneMuted { color: #bbc7ca; font-size: 12px; }
 QFrame#scenePanel { background: rgba(13, 19, 23, 225); border: 1px solid #635744; border-radius: 5px; }
 QPushButton { background: #20282c; color: #eee5d3; border: 1px solid #7f7054;
-              border-radius: 3px; padding: 8px 12px; font-size: 13px; min-height: 18px; }
+              border-radius: 3px; padding: 5px 12px; font-size: 13px; min-height: 18px; }
 QPushButton:hover { background: #36433c; border-color: #d4b785; }
 QPushButton:focus { border: 2px solid #f6d58f; }
 QPushButton:disabled { color: #a2a4a2; background: #24282a; border-color: #525653; }
@@ -210,13 +210,13 @@ class PortalWindow(QMainWindow):
 
     def resizeEvent(self, event):
         super().resizeEvent(event)
-        compact = self.width() < 1100 or self.height() < 700
+        compact = self.width() < 1100 or self.height() < 760
         if getattr(self, "compact", None) != compact:
             self.compact = compact
             self.setStyleSheet(STYLE + ("QPushButton { padding: 5px 10px; } QLabel#sceneValue { font-size: 15px; }" if compact else ""))
             if hasattr(self, "realm_panel"):
-                self.realm_panel.layout().setSpacing(6 if compact else 9)
-                self.status_panel.layout().setSpacing(6 if compact else 9)
+                self.realm_panel.layout().setSpacing(5 if compact else 6)
+                self.status_panel.layout().setSpacing(5 if compact else 6)
         QTimer.singleShot(0, self.position_play)
 
     def button(self, title, action):
@@ -227,7 +227,7 @@ class PortalWindow(QMainWindow):
         frame = QFrame(); frame.setObjectName("scenePanel")
         if fixed:
             frame.setFixedWidth(220)
-        layout = QVBoxLayout(frame); layout.setContentsMargins(16, 14, 16, 14); layout.setSpacing(9)
+        layout = QVBoxLayout(frame); layout.setContentsMargins(16, 14, 16, 14); layout.setSpacing(6)
         layout.addWidget(text_label(title, "sceneEyebrow"))
         return frame, layout
 

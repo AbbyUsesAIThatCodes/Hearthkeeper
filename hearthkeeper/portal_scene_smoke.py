@@ -83,8 +83,13 @@ def run(app, pack, output):
                 assert window.checked.text().startswith("Checked ")
                 sizes = []
                 for width, height in ((1920, 1080), (1440, 900), (1280, 720), (980, 640)):
-                    window.resize(width, height); settle(140)
-                    assert window.size().width() == width and window.size().height() == height, "Layout grew past the requested size"
+                    window.resize(width, height); settle(180)
+                    # Responsive padding can lower the minimum after the first
+                    # resize event. Reapply the request once after layout settles.
+                    window.resize(width, height); settle(180)
+                    assert window.size().width() == width and window.size().height() == height, (
+                        f"Requested {width}x{height}, got {window.width()}x{window.height()}; "
+                        f"minimum {window.minimumSize()}, layout {window.minimumSizeHint()}")
                     for item in (window.realm_panel, window.status_panel, window.client_panel, window.play):
                         rect = item.rect().translated(item.mapTo(window.stage, QPoint(0, 0)))
                         assert window.stage.rect().contains(rect), "Controls extend beyond the window"
