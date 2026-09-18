@@ -1,6 +1,12 @@
 # Hearthkeeper
 
-**Current preview: 0.1.0a8 — At the War Table**
+**Development preview: 0.1.0a9 — The Living Hearth**
+
+The a9 Home fits its launch controls on one screen, adds optional portal motion,
+and opens Realm tools and Activity in separate windows. See the
+[a9 guide and acceptance targets](docs/LIVING_HEARTH.md). Download the a9 Windows
+ZIP from this PR's successful **Native desktop** workflow. The published release
+below remains a8 until a9 is released.
 
 A desktop home for your personal Azeroth: install and manage a progression realm,
 preserve character records, and eventually build your own towns, instances, and regions.
@@ -70,8 +76,11 @@ it before writing the local address. Then click **Play**: Hearthkeeper validates
 again, starts the realm if needed, waits for healthy services, and launches WoW.
 Sign in using your existing realm account. No account password is saved by Play.
 
-**Realm tools** expands the existing install/resume, start/stop, status, settings,
-and log controls. The **Companion guide** explains how to bring an alternate
+**Realm tools…** opens the existing install/resume, start/stop, status, settings,
+and log controls in a separate window. **Activity…** opens the full operation log
+and stop control; the footer retains the latest line and progress. **Scene motion**
+toggles the optional portal animation and remembers the choice.
+The **Companion guide**, inside Realm tools, explains how to bring an alternate
 character along. Sources, characters, archives, and backups use the new dark
 metal/parchment theme. See [the home screen guide](docs/HOME.md).
 
@@ -120,7 +129,7 @@ database volume use the selected local Docker context. See [setup details](docs/
 
 | Area | Available in this preview |
 | --- | --- |
-| Home | Windows client selection, version checks, backed-up connection setup, Play, and expandable realm tools |
+| Home | Compact launch desk, optional portal motion, truthful local-host plaque, client checks, backed-up connection setup, Play, and separate tools/activity windows |
 | Characters | Create ordinary or GM accounts, list characters, capture a logged-out character |
 | Archives | Native viewer, search, checksum validation, module records, coverage, snapshot comparison |
 | Backups | Stop gameplay and save SQL databases, configuration, credentials, and source pins |

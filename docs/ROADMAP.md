@@ -20,6 +20,11 @@ recorded; Luna migration and the later capabilities remain planned.
 
 ### Next reviewable work
 
+The **0.1.0a9 — The Living Hearth** presentation pass implements compact Home,
+separate tools/activity windows, optional motion, and scaling acceptance checks.
+See [its guide](LIVING_HEARTH.md). PR/Windows user acceptance remains the gate;
+this does not count as Luna migration or live gameplay verification.
+
 1. **Accept the recovered a8 preview.** Open the existing realm, check all six
    pages and small-window readability, then verify Play with the realm initially
    stopped and already running. Log into the existing gnome. Record any visual
