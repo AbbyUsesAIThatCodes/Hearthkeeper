@@ -1,0 +1,23 @@
+{
+  "source": "AI-generated Home concept provided in this conversation",
+  "source_filename": "a_high_fantasy_highly_detailed_desktop_applicatio.png",
+  "source_sha256": "4ed718566f58a2d5724623a83adbad96ee53b0e463efb8d6d7c1ddc680bae89d",
+  "crop_box": [
+    602,
+    49,
+    1525,
+    375
+  ],
+  "raster_size": [
+    736,
+    260
+  ],
+  "asset": "home-portal.webp",
+  "sha256": "757c005bbbe97d35c64d993ec22dc915796205648791b80b9e73c4d41dec787f",
+  "notice": "The concept was not a running application. Its fictional service indicators, date, character count and controls are excluded from this crop. Expansion-name lettering is decorative; actual compatibility remains Wrath 3.3.5a/build 12340.",
+  "parts": [
+    "home-portal.01.b64",
+    "home-portal.02.b64",
+    "home-portal.03.b64"
+  ]
+}

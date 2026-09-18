@@ -1,0 +1,27 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "hearthkeeper"
+version = "0.1.0a8"
+description = "A local archive desk and development toolkit for a personal Azeroth"
+requires-python = ">=3.11"
+dependencies = []
+
+[project.optional-dependencies]
+mysql = ["PyMySQL[rsa]==1.2.0"]
+desktop = ["PySide6==6.8.3", "pywin32==311; sys_platform == 'win32'"]
+
+[project.scripts]
+hearthkeeper = "hearthkeeper.cli:main"
+
+[project.gui-scripts]
+hearthkeeper-desktop = "hearthkeeper.six_worlds:main"
+
+[tool.setuptools.packages.find]
+include = ["hearthkeeper*"]
+
+[tool.setuptools.package-data]
+hearthkeeper = ["assets/*", "data/*.json"]
+"hearthkeeper.server" = ["Dockerfile"]
