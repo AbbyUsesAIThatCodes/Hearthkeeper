@@ -102,7 +102,7 @@ def main():
         "entrypoint": "qml/Portal.qml", "vertices": 16545, "submeshes": 23,
         "restored": ["additive effect materials", "two UV scroll tracks: 3333 and 6667 ms"],
         "limitations": ["No M2 particle emitters, ribbons, or texture-weight animation", "No surrounding world terrain", "No guarantee of exact in-game effect parity"],
-        "files": {str(p.relative_to(output)): hashlib.sha256(p.read_bytes()).hexdigest()
+        "files": {p.relative_to(output).as_posix(): hashlib.sha256(p.read_bytes()).hexdigest()
                   for p in sorted(qml.parent.rglob("*")) if p.is_file()},
     }
     (output / "study.json").write_text(json.dumps(manifest, indent=2) + "\n", encoding="utf-8")

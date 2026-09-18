@@ -189,6 +189,7 @@ class PortalWindow(QMainWindow):
         grid.addLayout(activity_row, 4, 0, 1, 3)
         stage_layout.addWidget(overlay, 0, 0)
         self.setCentralWidget(self.stage)
+        self.quick.sceneGraphError.connect(lambda error, detail: self.scene_error(detail))
         self.scene.setProperty("studySource", QUrl.fromLocalFile(str(scene_pack(pack))))
         QShortcut(QKeySequence("F11"), self, activated=self.toggle_fullscreen)
         QShortcut(QKeySequence("Escape"), self, activated=self.escape)
