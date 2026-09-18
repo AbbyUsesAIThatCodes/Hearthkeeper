@@ -23,5 +23,5 @@ hearthkeeper-desktop = "hearthkeeper.six_worlds:main"
 include = ["hearthkeeper*"]
 
 [tool.setuptools.package-data]
-hearthkeeper = ["assets/*", "data/*.json"]
+hearthkeeper = ["assets/*", "data/*.json", "scene/*.qml", "scene/*.frag", "scene/*.vert"]
 "hearthkeeper.server" = ["Dockerfile"]
