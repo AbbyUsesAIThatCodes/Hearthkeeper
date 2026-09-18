@@ -1,0 +1,60 @@
+name: Dark Portal scene study
+on:
+  pull_request:
+    paths:
+      - 'hearthkeeper/portal_scene*'
+      - 'hearthkeeper/scene/**'
+      - 'tools/*portal*'
+      - 'build_portal.py'
+      - 'launch_portal.py'
+      - '.github/workflows/portal-study.yml'
+  workflow_dispatch:
+permissions:
+  contents: read
+jobs:
+  windows-study:
+    runs-on: windows-latest
+    timeout-minutes: 30
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '22'
+      - run: python -m pip install ".[desktop]" pyinstaller==6.16.0
+      - name: Prepare actual housing Portal with the pinned exporter
+        run: python tools/prepare_portal_study.py
+      - name: Render and exercise source prototype
+        run: python -m hearthkeeper.portal_scene --smoke-test var/portal-source
+        env:
+          QSG_RHI_PREFER_SOFTWARE_RENDERER: '1'
+      - name: Package separate prototype
+        run: python build_portal.py
+      - name: Render packaged prototype at 125 percent scaling
+        shell: pwsh
+        env:
+          QT_SCALE_FACTOR: '1.25'
+          QSG_RHI_PREFER_SOFTWARE_RENDERER: '1'
+        run: |
+          $taskApp = Start-Process -FilePath .\dist\Hearthkeeper-Portal-Study\Hearthkeeper-Portal-Study.exe -ArgumentList '--smoke-test', 'var/portal-packaged' -PassThru -Wait
+          if ($taskApp.ExitCode -ne 0) {
+            if (Test-Path var/portal-packaged/portal-error.txt) { Get-Content var/portal-packaged/portal-error.txt }
+            throw "Packaged study failed: $($taskApp.ExitCode)"
+          }
+          if (!(Test-Path var/portal-packaged/portal-result.json)) { throw 'No packaged render result' }
+      - uses: actions/upload-artifact@v4
+        with:
+          name: Hearthkeeper-Dark-Portal-Study-Windows
+          path: dist/Hearthkeeper-Portal-Study/
+          retention-days: 30
+      - uses: actions/upload-artifact@v4
+        if: always()
+        with:
+          name: dark-portal-study-evidence
+          path: |
+            var/portal-source/*
+            var/portal-packaged/*
+            var/portal-study/study.json
+          retention-days: 30

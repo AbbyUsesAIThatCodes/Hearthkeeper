@@ -21,3 +21,4 @@ dist/
 *.pem
 *.key
 Hearthkeeper.spec
+Hearthkeeper-Portal-Study.spec
